@@ -14,6 +14,7 @@ import com.lyraaria.mobile.player.SharePlugin;
 import com.lyraaria.mobile.player.HttpPlugin;
 import com.lyraaria.mobile.player.AppBridgePlugin;
 import com.lyraaria.mobile.player.LanDiscoveryPlugin;
+import com.lyraaria.mobile.player.UpdatePlugin;
 
 public class MainActivity extends BridgeActivity {
 
@@ -28,6 +29,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(HttpPlugin.class);
         registerPlugin(AppBridgePlugin.class);
         registerPlugin(LanDiscoveryPlugin.class);
+        registerPlugin(UpdatePlugin.class);
         super.onCreate(savedInstanceState);
         // 高刷屏（90/120Hz）上申报最高刷新率，动画/滚动更顺；60Hz 设备无副作用
         try {

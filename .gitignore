@@ -35,3 +35,7 @@ Thumbs.db
 patch-*.cjs
 AI-WORKLOG.md
 HANDOVER.md
+
+# 签名密钥（绝不入库）
+keystore/
+keystore.properties

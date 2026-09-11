@@ -256,6 +256,51 @@ async function applyLyrLocked(want) {
   if (lockSeg) lockSeg.querySelectorAll('.seg-item').forEach((x) => x.classList.toggle('active', (+x.dataset.v ? 1 : 0) === (PREF.lyrLocked ? 1 : 0)));
   return true;
 }
+// ---------- 应用内检查更新（GitHub Release，原生 AppUpdate 插件） ----------
+function upPlugin() { return window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins.AppUpdate : null; }
+let upDownloading = false;
+function bindUpdateUi() {
+  const P = upPlugin();
+  const btn = $('btnCheckUpdate');
+  if (!P || !btn) return;
+  // 关于：显示真实版本
+  try { P.getVersion().then((v) => { const el = $('aboutText'); if (el && v && v.versionName) el.textContent = '深空折韵 v' + v.versionName; }).catch(() => {}); } catch (e) {}
+  const setBtn = (txt, busy) => { btn.textContent = txt; btn.disabled = !!busy; };
+  // 进度事件
+  try { P.addListener('downloadProgress', (d) => { if (d && typeof d.percent === 'number') setBtn('下载中 ' + d.percent + '%', true); }); } catch (e) {}
+  btn.addEventListener('click', async () => {
+    setBtn('检查中…', true);
+    let r = null;
+    try { r = await P.checkUpdate({}); } catch (e) { setBtn('检查', false); toast('检查更新失败：' + ((e && e.message) || e)); return; }
+    if (!r || !r.available) { setBtn('检查', false); toast('已是最新版本'); try { localStorage.setItem('mp_last_update_check', String(Date.now())); } catch (e) {} return; }
+    setBtn('检查', false);
+    const mb = r.size ? '（' + Math.round(r.size / 1048576) + 'MB）' : '';
+    if (confirm('发现新版本 ' + (r.tag || '') + mb + '，现在下载更新？')) {
+      upDownloading = true; setBtn('下载中 0%', true);
+      try {
+        const dl = await P.downloadApk({ url: r.url, name: 'lyra-update.apk' });
+        setBtn('安装中…', true);
+        await P.installApk({ path: dl.path });
+        setBtn('检查', false);
+        toast('请在安装器中确认升级');
+      } catch (e) {
+        setBtn('重试下载', false);
+        toast('更新失败：' + ((e && e.message) || e));
+      } finally { upDownloading = false; }
+    }
+    try { localStorage.setItem('mp_last_update_check', String(Date.now())); } catch (e) {}
+  });
+  // 启动静默检查（24h 节流；只提示不自动下载）
+  setTimeout(async () => {
+    try {
+      const last = Number(localStorage.getItem('mp_last_update_check') || 0);
+      if (Date.now() - last < 20 * 3600 * 1000) return;
+      const r = await P.checkUpdate({});
+      localStorage.setItem('mp_last_update_check', String(Date.now()));
+      if (r && r.available) toast('发现新版本 ' + (r.tag || '') + '，可到设置-检查更新升级');
+    } catch (e) { /* 静默失败 */ }
+  }, 6000);
+}
 function bindLyrWinStyle() {
   const fsEl = $('setLyrFs'), opEl = $('setLyrOp'), bgSeg = $('setLyrBg'), c1Box = $('setLyrC1'), c2Box = $('setLyrC2');
   if (!fsEl) return;
@@ -5037,6 +5082,7 @@ function bind() {
     }
   }
   bindLyrWinStyle(); // 桌面歌词样式（字号/透明度/底色/双色）
+  bindUpdateUi(); // 应用内检查更新
   // 网易云账号（扫码登录/退出/收藏夹导入）
   {
     const btn = $('accNeteaseBtn'), imp = $('accNeteaseImport');

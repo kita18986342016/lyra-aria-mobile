@@ -2,13 +2,21 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
+    signingConfigs {
+        release {
+            def p = new Properties()
+            def pf = rootProject.file("../keystore.properties")
+            if (pf.exists()) { p.load(new FileInputStream(pf)); storeFile rootProject.file(p.storeFile); storePassword p.storePassword; keyAlias p.keyAlias; keyPassword p.keyPassword }
+        }
+    }
+
     namespace "com.lyraaria.mobile"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.lyraaria.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 140
+        versionCode 141
         versionName "1.4.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -19,6 +27,7 @@ android {
     }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
