@@ -18,4 +18,12 @@ public class AppBridgePlugin extends Plugin {
         final android.app.Activity act = getActivity();
         if (act != null) act.runOnUiThread(act::finish);
     }
+    @PluginMethod
+    public void getDeviceInfo(PluginCall call) {
+        JSObject ret = new JSObject();
+        String name = (android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL).trim();
+        ret.put("deviceName", name);
+        call.resolve(ret);
+    }
+
 }

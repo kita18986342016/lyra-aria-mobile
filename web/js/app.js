@@ -3966,6 +3966,8 @@ function collectAllSongMap() {
 function tombList() { return LS.load('tomb', []); }
 function addTombstone(key) { if (!key) return; const l = tombList().filter((t) => t.key !== key); l.push({ key, at: Date.now() }); LS.save('tomb', l); }
 function mergeTombstones(list) { const m = new Map(); for (const t of tombList()) m.set(t.key, t.at || 0); for (const t of (list || [])) { if (!t || !t.key) continue; m.set(t.key, Math.max(m.get(t.key) || 0, t.at || 0)); } LS.save('tomb', [...m].map(([key, at]) => ({ key, at }))); }
+let _deviceName = '';
+try { const AB = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppBridge; if (AB && AB.getDeviceInfo) AB.getDeviceInfo().then((d) => { _deviceName = (d && d.deviceName) || ''; }).catch(() => {}); } catch (e) {}
 function buildSyncBundle() {
   const songMap = collectAllSongMap();
   const pls = (state.onlinePlaylists || []).slice();
@@ -3981,7 +3983,7 @@ function buildSyncBundle() {
     profile: { nickname: PREF.nickname || '', avatar: PREF.avatar || '', updatedAt: acct.updatedAt || 0 },
     accounts: { netease: NE.getState(), kugou: KG.getState(), bilibili: biliGetAcc() },
     tombstones: tombList()
-  }, 'mobile');
+  }, (_deviceName || 'mobile'));
 }
 // 应用同步结果：并集数据 + 墓碑传播删除/解绑 + profile + 各源登录态（本地未登录才采用对方的）
 function applySyncBundle(r) {
