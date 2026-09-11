@@ -1,0 +1,1500 @@
+/* ============================================================
+   深空折韵 · 酷狗风格 v6（对标酷狗真实设计参数）
+   设计语言：纯色顶栏 · 极简搜索 · 暗色播放条 · 分割线列表 · 干净配色
+   酷狗原版色值：顶栏 #2ca2f9 / 搜索按钮 #2ba2fa / 搜索面板 #fbfbfb
+   变量契约完全保留（app.js applyAppearance 零改动）
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  /* 酷狗浅色 */
+  --bg: #f5f5f5;
+  --bg2: #ffffff;
+  --card: #ffffff;
+  --line: #e5e5e5;
+  --fg: #333333;
+  --dim: #999999;
+  --accent: #2ca2f9;
+  --accent2: #5bbcff;
+  --danger: #ef4444;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --radius: 8px;
+  --radius-sm: 6px;
+  --grad: linear-gradient(135deg, #5bbcff 0%, #2ca2f9 100%);
+  --grad-soft: linear-gradient(135deg, rgba(44,162,249,.06), rgba(44,162,249,.03));
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+  --shadow: 0 2px 6px rgba(0,0,0,.08);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,.12);
+  --glass: rgba(255,255,255,.95);
+  --bar-glass: rgba(255,255,255,.98);
+  /* 分层背景时各表面半透明色（氛围/预设/自定义/皮肤共用；皮肤可整体改色） */
+  --s-page: rgba(245,245,245,.78);
+  --s-row: rgba(255,255,255,.62);
+  --s-bar: rgba(255,255,255,.88);
+  --s-drawer: rgba(255,255,255,.92);
+}
+
+/* 深色 */
+html[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --bg2: #222222;
+  --card: #2a2a2a;
+  --line: #3a3a3a;
+  --fg: #e0e0e0;
+  --dim: #888888;
+  --accent: #5bbcff;
+  --accent2: #7ecaff;
+  --grad: linear-gradient(135deg, #5bbcff 0%, #2ca2f9 100%);
+  --grad-soft: linear-gradient(135deg, rgba(91,188,255,.08), rgba(44,162,249,.04));
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.15);
+  --shadow: 0 2px 6px rgba(0,0,0,.20);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,.30);
+  --glass: rgba(34,34,34,.95);
+  --bar-glass: rgba(34,34,34,.98);
+  --s-page: rgba(26,26,26,.78);
+  --s-row: rgba(34,34,34,.62);
+  --s-bar: rgba(30,30,30,.88);
+  --s-drawer: rgba(30,30,30,.92);
+}
+
+/* ===== 强调色（6）：仅换主色，背景/面板保持主题 ===== */
+html[data-accent="blue"]   { --accent:#60a5fa; --accent2:#3b82f6; --grad:linear-gradient(135deg,#60a5fa,#3b82f6); --grad-soft:linear-gradient(135deg,rgba(96,165,250,.08),rgba(59,130,246,.04)); }
+html[data-accent="purple"] { --accent:#a78bfa; --accent2:#8b5cf6; --grad:linear-gradient(135deg,#a78bfa,#8b5cf6); --grad-soft:linear-gradient(135deg,rgba(167,139,250,.08),rgba(139,92,246,.04)); }
+html[data-accent="green"]  { --accent:#34d399; --accent2:#10b981; --grad:linear-gradient(135deg,#34d399,#10b981); --grad-soft:linear-gradient(135deg,rgba(52,211,153,.08),rgba(16,185,129,.04)); }
+html[data-accent="orange"] { --accent:#fb923c; --accent2:#f97316; --grad:linear-gradient(135deg,#fb923c,#f97316); --grad-soft:linear-gradient(135deg,rgba(251,146,60,.08),rgba(249,115,22,.04)); }
+html[data-accent="pink"]   { --accent:#f472b6; --accent2:#ec4899; --grad:linear-gradient(135deg,#f472b6,#ec4899); --grad-soft:linear-gradient(135deg,rgba(244,114,182,.08),rgba(236,72,153,.04)); }
+html[data-accent="coral"]  { --accent:#ff7f6f; --accent2:#f65f4e; --grad:linear-gradient(135deg,#ff7f6f,#f65f4e); --grad-soft:linear-gradient(135deg,rgba(255,127,111,.08),rgba(246,95,78,.04)); }
+
+/* ===== 整套皮肤（7）：背景渐变 + 面板 + 强调色 + 文字 全量联动 ===== */
+html[data-skin] { --amb-strength:.26; }
+html[data-skin="applered"]{
+  --skin-bg:linear-gradient(160deg,#2a0d0d 0%,#4a1818 40%,#140a0a 100%);
+  --bg:#140a0a; --bg2:rgba(40,18,18,.82); --card:rgba(52,22,22,.86); --line:rgba(255,130,130,.16);
+  --fg:#f5ecec; --dim:#c4a3a3; --accent:#fa2d48; --accent2:#e01e37;
+  --grad:linear-gradient(135deg,#fa2d48,#e01e37); --grad-soft:linear-gradient(135deg,rgba(250,45,72,.14),rgba(224,30,55,.06));
+  --glass:rgba(36,14,14,.95); --bar-glass:rgba(20,10,10,.92);
+  --s-page:rgba(20,10,10,.62); --s-row:rgba(40,18,18,.5); --s-bar:rgba(24,12,12,.86); --s-drawer:rgba(30,14,14,.94);
+}
+html[data-skin="kugouneon"]{
+  --skin-bg:linear-gradient(160deg,#1a0533 0%,#3d1168 45%,#062b38 100%);
+  --bg:#120826; --bg2:rgba(30,12,54,.82); --card:rgba(44,18,72,.86); --line:rgba(220,120,255,.20);
+  --fg:#f4e8ff; --dim:#c39be0; --accent:#ff4dd8; --accent2:#00e5ff;
+  --grad:linear-gradient(135deg,#ff4dd8,#00e5ff); --grad-soft:linear-gradient(135deg,rgba(255,77,216,.14),rgba(0,229,255,.06));
+  --glass:rgba(28,10,52,.95); --bar-glass:rgba(18,8,38,.92);
+  --s-page:rgba(18,8,38,.6); --s-row:rgba(30,12,54,.5); --s-bar:rgba(24,10,46,.86); --s-drawer:rgba(28,12,52,.94);
+}
+html[data-skin="netease"]{
+  --skin-bg:linear-gradient(160deg,#f8f6f4 0%,#e8e2dd 100%);
+  --bg:#f8f6f4; --bg2:rgba(255,255,255,.9); --card:rgba(245,242,240,.92); --line:rgba(0,0,0,.08);
+  --fg:#2b2b2b; --dim:#8a8683; --accent:#c20c0c; --accent2:#e03131;
+  --grad:linear-gradient(135deg,#e03131,#c20c0c); --grad-soft:linear-gradient(135deg,rgba(194,12,12,.08),rgba(194,12,12,.03));
+  --glass:rgba(255,255,255,.97); --bar-glass:rgba(248,246,244,.95);
+  --s-page:rgba(248,246,244,.66); --s-row:rgba(255,255,255,.6); --s-bar:rgba(255,255,255,.9); --s-drawer:rgba(255,255,255,.95);
+}
+html[data-skin="qqdark"]{
+  --skin-bg:linear-gradient(160deg,#0b1e2d 0%,#123246 55%,#0a1620 100%);
+  --bg:#0b1620; --bg2:rgba(18,36,50,.82); --card:rgba(26,48,64,.86); --line:rgba(140,190,215,.16);
+  --fg:#e8f3f8; --dim:#8fb3c6; --accent:#1ed45f; --accent2:#17b354;
+  --grad:linear-gradient(135deg,#1ed45f,#17b354); --grad-soft:linear-gradient(135deg,rgba(30,212,95,.12),rgba(23,179,84,.05));
+  --glass:rgba(15,30,42,.95); --bar-glass:rgba(11,22,32,.92);
+  --s-page:rgba(11,22,32,.62); --s-row:rgba(18,36,50,.5); --s-bar:rgba(13,28,40,.86); --s-drawer:rgba(15,30,42,.94);
+}
+html[data-skin="spotifyw"]{
+  --skin-bg:linear-gradient(160deg,#ffffff 0%,#f2f2f2 100%);
+  --bg:#fafafa; --bg2:rgba(255,255,255,.92); --card:rgba(240,240,240,.94); --line:rgba(0,0,0,.08);
+  --fg:#191414; --dim:#8a8a8a; --accent:#1db954; --accent2:#17a34a;
+  --grad:linear-gradient(135deg,#1db954,#17a34a); --grad-soft:linear-gradient(135deg,rgba(29,185,84,.1),rgba(23,163,74,.04));
+  --glass:rgba(255,255,255,.98); --bar-glass:rgba(250,250,250,.96);
+  --s-page:rgba(250,250,250,.66); --s-row:rgba(255,255,255,.62); --s-bar:rgba(255,255,255,.9); --s-drawer:rgba(255,255,255,.96);
+}
+html[data-skin="xuancai"]{
+  --skin-bg:linear-gradient(135deg,#ff2d78 0%,#a44dff 35%,#3d8bff 65%,#00e5a8 100%);
+  --bg:#1a1030; --bg2:rgba(26,18,46,.82); --card:rgba(38,26,60,.86); --line:rgba(255,255,255,.16);
+  --fg:#ffffff; --dim:#d9c9e8; --accent:#ff5c8a; --accent2:#ffe26b;
+  --grad:linear-gradient(135deg,#ff5c8a,#ffe26b); --grad-soft:linear-gradient(135deg,rgba(255,92,138,.16),rgba(255,226,107,.06));
+  --glass:rgba(26,18,44,.95); --bar-glass:rgba(20,14,36,.92);
+  --s-page:rgba(20,14,36,.5); --s-row:rgba(26,18,44,.44); --s-bar:rgba(24,16,42,.82); --s-drawer:rgba(26,18,44,.94);
+}
+html[data-skin="huancai"]{
+  --skin-bg:linear-gradient(115deg,#ff50a0 0%,#785aff 30%,#00dcff 60%,#ffbe3c 100%);
+  --bg:#0c0a24; --bg2:rgba(18,16,42,.82); --card:rgba(30,24,58,.86); --line:rgba(180,140,255,.18);
+  --fg:#f0ecff; --dim:#aaa0d0; --accent:#c86bff; --accent2:#00d9ff;
+  --grad:linear-gradient(135deg,#c86bff,#00d9ff); --grad-soft:linear-gradient(135deg,rgba(200,107,255,.14),rgba(0,217,255,.06));
+  --glass:rgba(16,14,38,.95); --bar-glass:rgba(12,10,36,.92);
+  --s-page:rgba(12,10,36,.5); --s-row:rgba(18,16,42,.44); --s-bar:rgba(14,12,36,.82); --s-drawer:rgba(16,14,38,.94);
+}
+/* 皮肤激活时：#appAmbient 铺皮肤渐变，主表面走半透明让渐变透出 */
+html[data-skin] body.ambient-on #page { background: var(--s-page); }
+
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: -apple-system, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 14px; overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: background .3s, color .3s;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.4;
+}
+.hidden { display: none !important; }
+
+/* ============ 顶部栏（酷狗纯色） ============ */
+#topBar {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px; height: 48px;
+  padding-top: env(safe-area-inset-top);
+  background: var(--accent);
+  color: #fff; flex: 0 0 auto; z-index: 5;
+}
+#topTitle {
+  font-size: 17px; font-weight: 600; letter-spacing: 0.3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65vw;
+}
+#topActions { display: flex; gap: 4px; align-items: center; }
+#topBar .icon-btn { color: rgba(255,255,255,.90); font-size: 20px; display: inline-flex; align-items: center; justify-content: center; }
+#topBack { color: rgba(255,255,255,.90); padding: 8px; margin-left: -8px; display: inline-flex; align-items: center; justify-content: center; }
+#topBack svg { display: block; }
+/* 首页右上角搜索/设置 */
+.home-top-acts { display: flex; gap: 2px; align-items: center; }
+.home-top-acts .icon-btn { color: var(--fg); }
+.home-top-acts svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; display: block; }
+/* 最近听过页顶栏：与首页同款材质（半透明浅灰随氛围），标题居中 */
+#topBar.tb-home { background: var(--bg); color: var(--fg); }
+body.ambient-on #topBar.tb-home { background: rgba(245, 245, 245, .78); }
+html[data-theme="dark"] body.ambient-on #topBar.tb-home { background: rgba(26, 26, 26, .78); }
+#topBar.tb-home .icon-btn { color: #333; }
+html[data-theme="dark"] #topBar.tb-home .icon-btn { color: #ddd; }
+#topBar.tb-home #topTitle {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  max-width: 46vw; text-align: center; color: var(--fg);
+}
+
+/* ============ 页面 ============ */
+#page { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+#page::-webkit-scrollbar { display: none; }
+/* 有氛围背景时：页面/主要表面走半透明变量（--s-*），让背景层透出；皮肤/预设通过改这些变量整体换肤 */
+body.ambient-on #page { background: var(--s-page); }
+body.ambient-on .song-row { background: var(--s-row); }
+body.ambient-on #playerBar { background: var(--s-bar); }
+body.ambient-on #bottomNav { background: var(--s-bar); }
+body.ambient-on .drawer { background: var(--s-drawer); }
+/* 首页顶栏可读性：氛围模式下给首页头部加一层近不透明渐隐遮罩，遮住模糊封面透出的歌名文字，向下自然过渡回氛围背景 */
+body.ambient-on #pageSearch { position: relative; }
+body.ambient-on #pageSearch::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 392px; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg) 82%, rgba(245,245,245,0) 100%);
+}
+html[data-theme="dark"] body.ambient-on #pageSearch::before { background: linear-gradient(180deg, var(--bg) 0%, var(--bg) 82%, rgba(26,26,26,0) 100%); }
+body.ambient-on #pageSearch > * { position: relative; z-index: 1; }
+
+/* ============ 氛围背景（对齐 PC appBg：当前播放封面模糊铺底） ============ */
+#appAmbient {
+  position: fixed; inset: -34px; z-index: 0; overflow: hidden;
+  opacity: 0; transition: opacity .6s ease; pointer-events: none;
+}
+#appAmbient.show { opacity: 1; }
+#appAmbient img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  filter: blur(var(--amb-blur, 46px)) brightness(1.04) saturate(1.08);
+}
+/* 压暗遮罩（照 PC #appBg::after：--bg-dim 主题色 × --bg-strength 强度） */
+#appAmbient::after {
+  content: ''; position: absolute; inset: 0;
+  background: var(--bg, #f5f5f5); opacity: var(--amb-strength, .6);
+}
+body.ambient-on #page { position: relative; z-index: 1; }
+body.ambient-on #topBar { position: relative; z-index: 1; }
+/* 氛围模式下弹层跟随半透明+毛玻璃（照 PC 面板 rgba .8 + blur） */
+body.ambient-on .drawer,
+body.ambient-on .overlay-box,
+body.ambient-on .sheet-box {
+  background: rgba(255, 255, 255, .92);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+}
+html[data-theme="dark"] body.ambient-on .drawer,
+html[data-theme="dark"] body.ambient-on .overlay-box,
+html[data-theme="dark"] body.ambient-on .sheet-box { background: rgba(30, 30, 30, .92); }
+
+/* ============ 批次29：歌单详情页浅色皮肤（规格：纯白底+黑字，盖过氛围半透明） ============ */
+#topBar.tb-light { background: #fff; color: #111; box-shadow: 0 1px 0 #f0f0f2; }
+#topBar.tb-light #topTitle { color: #111; }
+#topBar.tb-light .icon-btn { color: #333; }
+#topBack { padding: 8px; display: inline-flex; align-items: center; }
+#topBack svg { width: 22px; height: 22px; display: block; }
+body.detail-white #page { background: #fff; position: relative; z-index: 1; }
+body.detail-white #playerBar,
+body.detail-white #bottomNav { background: #fff; }
+.pl-subbar {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 40px; padding: 0 16px;
+}
+.pl-count { font-size: 12px; color: #999; }
+.pl-sub-acts { display: flex; gap: 2px; }
+.pl-sub-acts .icon-btn { color: #666; }
+/* 详情页白底皮肤（几何样式已并入全局 .song-row 统一规则） */
+#oplDetailList .song-row { background: #fff; }
+#oplDetailList .song-row .t { color: #111; }
+#oplDetailList .song-row .a { color: #999; }
+#oplDetailList .song-row.playing { background: #fff; }
+#oplDetailList .song-row.playing .t { color: var(--accent); }
+/* 歌单大封面头部（批次31c：模糊封面通栏铺满，含顶栏一体光晕） */
+#topBar { overflow: hidden; }
+#topBar.tb-light { background: #fff; box-shadow: none; }
+/* 详情页标题真正居中（浮在光晕上，两侧按钮不影响） */
+#topBar.tb-light #topTitle {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  max-width: 46vw; text-align: center;
+}
+#topBar.tb-light::before {
+  content: ''; position: absolute; inset: -28px;
+  background-image: var(--hero-img, none); background-size: cover; background-position: center 30%;
+  filter: blur(26px) saturate(1.6) brightness(1.06); opacity: .55;
+}
+#topBar.tb-light > * { position: relative; z-index: 1; }
+.pl-hero { position: relative; overflow: hidden; display: flex; align-items: center; gap: 16px; padding: 18px 16px 22px; }
+.pl-hero-bg {
+  position: absolute; left: -28px; top: -40%; width: calc(100% + 56px); height: 180%;
+  object-fit: cover; filter: blur(26px) saturate(1.6) brightness(1.06); opacity: .55;
+}
+/* 下缘渐隐到白底，光晕自然过渡进列表 */
+.pl-hero::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .04) 0%, rgba(255, 255, 255, .22) 60%, rgba(255, 255, 255, .92) 100%);
+}
+.pl-hero-covwrap, .pl-hero-info { z-index: 1; }
+.pl-hero-covwrap { position: relative; width: 96px; height: 96px; flex: 0 0 auto; }
+.pl-hero-glow {
+  position: absolute; left: 10px; right: 10px; top: 18px; height: 96px;
+  border-radius: 22px; object-fit: cover;
+  filter: blur(22px) saturate(1.7); opacity: .55; transform: scale(.9);
+}
+.pl-hero-cov {
+  position: relative; width: 96px; height: 96px; border-radius: 16px; object-fit: cover;
+  background: #f2f2f3; display: block; box-shadow: 0 10px 26px rgba(0, 0, 0, .14);
+}
+.pl-hero-info { flex: 1; min-width: 0; }
+.pl-hero-name {
+  font-size: 17px; font-weight: 700; color: #111; line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.pl-hero-meta { font-size: 12px; color: #999; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-hero-desc { font-size: 11px; color: #b3b3b6; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-play-pill {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 9px;
+  padding: 6px 16px; border-radius: 999px; border: none; cursor: pointer;
+  background: #111; color: #fff; font-size: 12px; font-weight: 600; letter-spacing: .5px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .18);
+}
+.pl-play-pill:active { opacity: .8; }
+.pl-play-pill svg { stroke: #fff; }
+.pl-hero-acts { display: flex; align-items: center; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
+.pl-hero-acts .pl-play-pill { margin-top: 0; }
+.pl-hero-acts .pl-ghost-pill:first-of-type { margin-left: auto; }
+.pl-ghost-pill {
+  display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, .16); background: rgba(255, 255, 255, .58); color: #222;
+  cursor: pointer; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.pl-ghost-pill:active { opacity: .75; }
+.pl-ghost-pill svg { stroke: #222; }
+.pl-ghost-pill.on { color: #ff5a6e; border-color: rgba(255, 90, 110, .55); }
+.pl-ghost-pill.on svg { stroke: #ff5a6e; fill: #ff5a6e; }
+#oplDetailList .song-row .ops { opacity: .85; }
+#oplDetailList .song-row.playing { background: #fff; }
+#oplDetailList .song-row.playing .t { color: var(--accent); }
+.sheet-item.active { color: var(--accent); font-weight: 600; }
+
+/* ============ 线性 SVG 图标（统计格/顶部图标/头像，与底栏风格统一） ============ */
+.me-stat-icon svg, .me-top-icons .icon-btn svg, .me-avatar-big svg {
+  width: 22px; height: 22px; stroke: currentColor; fill: none;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; display: block;
+}
+.me-avatar-big svg { width: 30px; height: 30px; stroke: #fff; }
+.me-top-icons .icon-btn svg { width: 20px; height: 20px; }
+
+/* ============ 队列数量角标（对齐 PC 99+ 红点） ============ */
+#ppActQueue, #pbQueue { position: relative; }
+.q-badge {
+  position: absolute; top: 0; right: -2px; min-width: 15px; height: 15px; padding: 0 4px;
+  border-radius: 8px; background: #ff4757; color: #fff;
+  font-size: 9px; line-height: 15px; font-weight: 700; text-align: center;
+  pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+
+/* ============ 播放页「更多」底部面板 ============ */
+#ppMoreSheet { align-items: flex-end; z-index: 72; } /* 高于播放页(60)，低于队列抽屉(70→72 需盖过播放页) */
+.sheet-box {
+  width: min(78vw, 340px); background: var(--bg2);
+  border-radius: 18px; padding: 14px 16px 12px;
+  margin-bottom: calc(22px + var(--safe-bottom));
+  box-shadow: 0 14px 44px rgba(0, 0, 0, .26);
+  animation: sheetUp .22s ease;
+}
+@keyframes sheetUp { from { transform: translateY(30px); opacity: .5; } to { transform: none; opacity: 1; } }
+.sheet-title { font-size: 13px; color: var(--dim); padding: 2px 6px 8px; }
+.sheet-item {
+  display: block; width: 100%; text-align: left; padding: 13px 6px;
+  font-size: 15px; color: var(--fg); background: none; border: none;
+  border-bottom: 1px solid var(--line); cursor: pointer;
+}
+.sheet-item.disabled { color: var(--dim); cursor: default; }
+.sheet-item svg { vertical-align: -3px; margin-right: 9px; }
+.sheet-item .soon {
+  font-size: 10px; color: var(--dim); border: 1px solid var(--line);
+  border-radius: 3px; padding: 0 5px; margin-left: 8px;
+}
+.sheet-cancel {
+  display: block; width: 100%; margin-top: 10px; padding: 12px;
+  background: var(--bg); border: none; border-radius: 10px;
+  font-size: 15px; color: var(--dim); cursor: pointer;
+}
+.page { padding: 12px 0 calc(140px + var(--safe-bottom)); animation: pageIn .26s cubic-bezier(.22, .9, .32, 1); }
+@keyframes pageIn { from { opacity: 0; transform: translateY(8px) scale(.995); } to { opacity: 1; transform: none; } }
+
+/* ===== 批次49 动效/质感/骨架屏 ===== */
+/* 弹层统一弹性曲线 */
+.sheet-box, .pick-sheet, .overlay-box { animation: sheetPop .26s cubic-bezier(.2, .9, .3, 1.15); }
+@keyframes sheetPop { from { transform: translateY(22px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+/* 收藏红心点击弹跳 */
+@keyframes heartPop { 0% { transform: scale(1); } 35% { transform: scale(1.35); } 70% { transform: scale(.9); } 100% { transform: scale(1); } }
+.heart-pop { animation: heartPop .34s cubic-bezier(.2, .9, .3, 1.2); }
+/* 迷你条封面换图淡入 */
+#pbCoverImg { transition: opacity .28s ease; }
+#pbCoverImg.pb-fade { opacity: 0; }
+/* 列表底部渐隐遮罩（贴底时消失） */
+.song-list, .opl-list { -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 14px), transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 14px), transparent 100%); }
+/* 骨架屏 */
+.skel { position: relative; overflow: hidden; background: var(--bg); border-radius: 8px; }
+.skel::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(128, 128, 128, .14), transparent); animation: skelShim 1.1s infinite; }
+@keyframes skelShim { to { transform: translateX(100%); } }
+.skel-row { display: flex; align-items: center; gap: 12px; height: 70px; padding: 0 12px; }
+.skel-cov { width: 60px; height: 60px; border-radius: 10px; flex: 0 0 auto; }
+.skel-lines { flex: 1; }
+.skel-l1 { width: 55%; height: 14px; margin-bottom: 8px; }
+.skel-l2 { width: 38%; height: 11px; }
+.skel-card { width: 104px; flex: 0 0 auto; }
+.skel-card .skel-cov { width: 104px; height: 104px; border-radius: 10px; }
+.skel-card .skel-l1 { width: 80%; height: 12px; margin: 8px 0 0; }
+/* 统一空状态 */
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px 24px; color: var(--dim); text-align: center; }
+.empty-state svg { width: 44px; height: 44px; stroke: currentColor; fill: none; stroke-width: 1.5; opacity: .5; }
+.empty-state .es-text { font-size: 14px; }
+.empty-state .es-btn { margin-top: 6px; padding: 8px 22px; border-radius: 999px; border: none; background: var(--accent); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+/* ============ 首页顶部标签导航 ============ */
+.home-top-tabs {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px 0;
+}
+.home-top-tab-list { display: flex; gap: 18px; }
+.home-top-tab {
+  background: transparent; border: none; color: var(--dim);
+  font-size: 15px; font-weight: 500; padding: 6px 0; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+}
+.home-top-tab.active { color: var(--fg); font-weight: 700; border-bottom-color: var(--accent); }
+
+/* ============ 搜索胶囊区 ============ */
+.search-capsule {
+  display: flex; align-items: center; gap: 8px;
+  margin: 10px 12px; padding: 9px 14px;
+  background: #f0f0f0; border-radius: 20px; cursor: pointer;
+}
+html[data-theme="dark"] .search-capsule { background: #252525; }
+.search-capsule-icon { width: 18px; height: 18px; flex: 0 0 auto; }
+.search-capsule-text { font-size: 14px; color: #bbb; flex: 1; }
+
+/* ============ 搜索展开区（点击胶囊后） ============ */
+.search-box { display: flex; gap: 8px; padding: 10px 12px; background: #fbfbfb; }
+html[data-theme="dark"] .search-box { background: #252525; }
+.search-box input {
+  flex: 1; min-width: 0; background: #fff; color: var(--fg);
+  border: 1px solid #e5e5e5; border-radius: 999px;
+  padding: 8px 14px; font-size: 14px; outline: none;
+  transition: border-color .2s;
+}
+html[data-theme="dark"] .search-box input { background: #2a2a2a; border-color: #444; }
+.search-box input:focus { border-color: var(--accent); }
+.search-box input::placeholder { color: #bbb; }
+
+/* ============ 三列大卡片区 ============ */
+.home-big-cards {
+  display: flex; gap: 10px; padding: 0 12px; margin-bottom: 14px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.home-big-cards::-webkit-scrollbar { display: none; }
+.home-big-card {
+  flex: 0 0 44%; border-radius: 12px; padding: 14px;
+  display: flex; flex-direction: column; gap: 10px; min-height: 100px;
+  background: var(--card); box-shadow: var(--shadow-sm);
+}
+.home-big-card-text { display: flex; flex-direction: column; gap: 2px; }
+.home-big-card-title { font-size: 15px; font-weight: 700; color: var(--fg); }
+.home-big-card-sub { font-size: 12px; color: var(--dim); }
+/* 封面拼贴（2x2 小图；无数据回退线性音符） */
+.home-big-card-cover {
+  width: 48px; height: 48px; border-radius: 12px; align-self: flex-end; overflow: hidden;
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px;
+  background: rgba(0,0,0,.05);
+}
+.home-big-card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.home-big-card-cover .hbc-note {
+  grid-column: 1 / -1; grid-row: 1 / -1; width: 26px; height: 26px; margin: auto;
+  stroke: var(--dim); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ============ 横幅区 ============ */
+.home-banner {
+  display: flex; align-items: center; gap: 12px;
+  margin: 0 12px 14px; padding: 14px 16px;
+  background: #e8f4ff; border-radius: 12px;
+}
+html[data-theme="dark"] .home-banner { background: #1a2a3a; }
+.home-banner-icon { font-size: 28px; color: var(--accent); flex: 0 0 auto; }
+.home-banner-text { flex: 1; }
+.home-banner-title { font-size: 15px; font-weight: 700; color: var(--fg); }
+.home-banner-sub { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.home-banner-btn { padding: 6px 16px; font-size: 13px; flex: 0 0 auto; }
+/* 官方卡面图版名片 */
+.home-banner-img { position: relative; padding: 0; background: none; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 18px rgba(20, 24, 32, .12); cursor: pointer; }
+.home-banner-img img { display: block; width: 100%; height: auto; }
+.home-banner-img:active { opacity: .9; }
+.home-banner-21 { aspect-ratio: 2 / 1; }
+.home-banner-21 img { width: 100%; height: 100%; object-fit: cover; }
+.home-sec { margin-bottom: 6px; }
+
+/* ============ 曲库 tab（统一风格） ============ */
+.lib-tabs { padding: 10px 12px 0; }
+.lib-seg { width: 100%; border-radius: 12px; }
+.lib-seg .seg-item { flex: 1; text-align: center; border-radius: 9px; }
+.lib-searchwrap { padding: 10px 12px 0; }
+#localSearch { margin: 0; width: 100%; }
+.lib-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 6px; }
+.lib-refresh { display: inline-flex; align-items: center; gap: 5px; background: none; border: none; color: var(--accent); font-size: 13px; cursor: pointer; padding: 4px 0; }
+.lib-refresh svg { stroke: var(--accent); }
+#localList { padding-top: 2px; }
+
+/* ============ 我的页 功能入口宫格 ============ */
+.me-quick-grid { display: flex; gap: 8px; padding: 4px 12px 14px; }
+.me-quick { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--bg2); border: none; border-radius: 14px; padding: 12px 2px; cursor: pointer; }
+.me-quick:active { background: var(--bg); }
+.me-quick-ic { width: 24px; height: 24px; }
+.me-quick-ic svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; display: block; }
+.me-quick-lb { font-size: 12px; color: var(--fg); font-weight: 500; }
+.me-quick-num { font-size: 10px; color: var(--dim); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ============ 设置分组折叠 ============ */
+.set-list { padding: 8px 12px; }
+.set-cat-row { width: 100%; display: flex; align-items: center; gap: 8px; padding: 16px 14px; margin-bottom: 10px; background: var(--bg2); border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+.set-cat-row:active { background: var(--bg); }
+.set-cat-name { font-size: 16px; font-weight: 600; color: var(--fg); }
+.set-cat-sum { margin-left: auto; font-size: 13px; color: var(--dim); }
+.set-cat-chev { width: 18px; height: 18px; margin-left: 6px; stroke: var(--dim); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+.set-cat-sum + .set-cat-chev { margin-left: 6px; }
+.set-cat-row .set-cat-chev { margin-left: auto; }
+.set-cat-row .set-cat-sum + .set-cat-chev { margin-left: 6px; }
+#pageSettingsSub { padding-top: 4px; }
+.set-cat-body { margin: 10px 12px; background: var(--bg2); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+.set-cat-body .set-row { border-bottom: 1px solid var(--line); }
+.set-cat-body .set-row:last-child { border-bottom: none; }
+.set-cat-body .set-row:first-child { border-top: none; }
+
+/* ============ 我的页 账号管理（三端独立圆角卡） ============ */
+.acc-row { display: flex; align-items: center; gap: 8px; padding: 14px; margin: 0 12px 10px; background: var(--bg2); border: none; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+.acc-plat { font-size: 15px; font-weight: 600; color: var(--fg); }
+.acc-state { font-size: 12px; color: var(--dim); margin-left: auto; margin-right: 8px; max-width: 8em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-action { background: rgba(47,107,255,.1); border: none; color: var(--accent); font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+.st-action:active { opacity: .7; }
+/* 用户卡：头像可换、昵称可改 */
+.me-avatar-big { background-size: cover; background-position: center; cursor: pointer; }
+.me-avatar-big.has-img svg { display: none; }
+.me-name-edit { background: none; border: none; padding: 2px; margin-left: 2px; vertical-align: middle; cursor: pointer; color: var(--dim); }
+.me-name-edit svg { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; }
+
+/* ============ 一键导入挑选抽屉 ============ */
+.sheet-overlay { align-items: center; justify-content: center; padding: 0 16px; }
+.pick-sheet { width: 100%; max-width: 460px; max-height: 76vh; background: var(--bg2); border-radius: 18px; display: flex; flex-direction: column; padding-bottom: 0; animation: popIn .2s ease; overflow: hidden; }
+.pick-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 10px; }
+.pick-title { font-size: 16px; font-weight: 700; color: var(--fg); }
+.pick-all { background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px 6px; }
+.pick-list { flex: 1; overflow-y: auto; padding: 0 8px; }
+.pick-row { display: flex; align-items: center; gap: 12px; padding: 9px 8px; border-radius: 12px; cursor: pointer; }
+.pick-row:active { background: var(--bg); }
+.pick-cov { width: 52px; height: 52px; border-radius: 10px; background: var(--grad-soft, #eef2f6); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; overflow: hidden; flex: 0 0 auto; }
+.pick-cov img { width: 100%; height: 100%; object-fit: cover; }
+.pick-info { flex: 1; min-width: 0; }
+.pick-name { font-size: 15px; color: var(--fg); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pick-count { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.pick-check { width: 24px; height: 24px; border-radius: 50%; border: 1.8px solid var(--line); color: transparent; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; transition: background .12s, border-color .12s; }
+.pick-row.on .pick-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pick-foot { display: flex; gap: 10px; padding: 12px 16px 14px; border-top: 1px solid var(--line); }
+.pick-foot .ghost-btn { flex: 1; }
+.pick-ok { flex: 2; }
+.set-grp { background: var(--bg2); border-bottom: 1px solid var(--line); }
+.set-grp:last-child { border-bottom: none; }
+.set-grp-head { width: 100%; display: flex; align-items: center; gap: 8px; padding: 14px 16px; background: none; border: none; cursor: pointer; font-size: 15px; font-weight: 700; color: var(--fg); }
+.set-grp-sum { margin-left: auto; font-size: 12px; color: var(--dim); font-weight: 400; }
+.set-grp-chev { width: 18px; height: 18px; margin-left: 6px; stroke: var(--dim); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s; flex: 0 0 auto; }
+.set-grp-body { display: none; }
+.set-grp.open .set-grp-body { display: block; }
+.set-grp.open .set-grp-chev { transform: rotate(180deg); }
+.set-grp-body .set-row:last-child { border-bottom: none; }
+
+/* ============ 歌单页 三分类锚点导航 ============ */
+.pl-sec-head { padding: 4px 12px 8px; }
+.pl-sec-titlerow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+.pl-import-btn { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px 2px; }
+.pl-import-btn svg { stroke: var(--accent); }
+.pl-sec-title { font-size: 17px; font-weight: 800; color: var(--fg); }
+.pl-sec-caps { display: flex; gap: 6px; }
+.pl-cap { flex: 0 0 auto; padding: 4px 12px; font-size: 12px; line-height: 1.4; color: var(--dim); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; cursor: pointer; transition: color .15s, background .15s, border-color .15s; }
+.pl-cap.active { color: #fff; background: var(--accent); border-color: var(--accent); font-weight: 600; }
+.pl-cap:active { opacity: .8; }
+#myPlSec, #recentPlSec, #tempPlSec { scroll-margin-top: 8px; }
+.pl-more { background: none; border: none; color: var(--dim); font-size: 12px; cursor: pointer; padding: 4px 2px; }
+.pl-more:active { opacity: .6; }
+
+/* ============ 分区标题 ============ */
+.home-section-title { font-size: 16px; font-weight: 700; padding: 0 12px; margin-bottom: 10px; color: var(--fg); }
+
+/* 音源胶囊标签 */
+.home-source-tabs {
+  display: flex; gap: 8px; padding: 0 12px; margin: 10px 0;
+}
+.home-source-tab {
+  background: transparent; border: 1px solid var(--line); border-radius: 14px;
+  color: var(--dim); font-size: 12px; padding: 4px 14px; cursor: pointer;
+  transition: all .15s;
+}
+.home-source-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.hint { color: var(--dim); text-align: center; margin: 30px 12px; font-size: 13px; line-height: 1.6; }
+.hint.small { font-size: 12px; margin: 6px 0; }
+
+/* ============ 按钮 ============ */
+.primary-btn, .ghost-btn, .icon-btn, .big-btn {
+  border: none; border-radius: 10px; cursor: pointer; color: var(--fg);
+  font-size: 14px; padding: 8px 16px; transition: opacity .15s;
+}
+.primary-btn {
+  background: var(--accent); color: #fff; font-weight: 500;
+}
+.primary-btn:active { opacity: .8; }
+.ghost-btn {
+  background: var(--bg); border: 1px solid var(--line); color: var(--fg);
+}
+.ghost-btn:active { opacity: .8; }
+.icon-btn {
+  padding: 6px 8px; font-size: 18px; background: transparent; border: none; color: var(--fg);
+}
+.icon-btn:active { opacity: .6; }
+.big-btn {
+  width: 56px; height: 56px; border-radius: 50%; font-size: 24px;
+  background: var(--accent); color: #fff; border: none; font-weight: 700;
+}
+.big-btn:active { opacity: .8; }
+.row { display: flex; gap: 8px; align-items: center; }
+
+/* ============ 歌曲列表（全站统一详情行样式：70px 行 / 60 封面 / 粗黑歌名 / 徽章同行 / 无分割线） ============ */
+.song-list { display: flex; flex-direction: column; }
+.song-row {
+  display: flex; align-items: center; gap: 12px; padding: 0 12px; height: 70px;
+  cursor: pointer; background: var(--bg2); border-bottom: none;
+  transition: background .12s;
+}
+.song-row:active { background: var(--bg); }
+.song-row .cov {
+  width: 60px; height: 60px; border-radius: 10px; background: var(--bg);
+  flex: 0 0 auto; object-fit: cover;
+}
+.song-row .info { flex: 1; min-width: 0; }
+.song-row .t {
+  font-size: 16px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fg);
+}
+.song-row .a {
+  display: flex; align-items: center; gap: 0; margin-top: 4px;
+  font-size: 12px; color: var(--dim); overflow: hidden; white-space: nowrap;
+}
+.song-row .a .a-name { flex: 0 0 4em; width: 4em; margin-right: 1em; overflow: hidden; text-overflow: ellipsis; }
+.song-row .a .st { flex: 0 0 auto; }
+.song-row .ops { display: flex; gap: 2px; opacity: .85; }
+.song-row .ops .icon-btn { padding: 6px 6px; font-size: 14px; }
+.song-row.playing { background: var(--grad-soft); }
+.song-row.playing .t { color: var(--accent); }
+.song-row .dur { color: var(--dim); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+/* ============ 歌单卡片 ============ */
+.opl-list { display: flex; flex-direction: column; }
+.opl-card {
+  display: flex; align-items: center; gap: 12px; background: var(--bg2);
+  padding: 0 12px; height: 70px; cursor: pointer;
+  border-bottom: none;
+  transition: background .12s;
+}
+.opl-card:active { background: var(--bg); }
+.opl-card.dragging {
+  position: relative; z-index: 5; opacity: .92;
+  background: var(--card); box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  transform: scale(1.015);
+  -webkit-user-select: none; user-select: none;
+}
+.opl-card .cov { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--bg); flex: 0 0 auto; }
+.opl-card .name { font-size: 15px; font-weight: 600; }
+.opl-card .meta { font-size: 12px; color: var(--dim); margin-top: 3px; }
+.opl-card .icon-btn { color: var(--dim); }
+
+/* ============ 歌单内歌曲拖拽排序（手柄 + 整行高亮，对齐 PC drag-over） ============ */
+.drag-handle {
+  width: 20px; text-align: center; color: var(--dim); font-size: 13px;
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+  flex: 0 0 auto;
+}
+.song-row.drag-src { opacity: .55; }
+.song-row.drag-over { background: var(--grad-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* ============ 标签编辑器 / 重复清理弹窗 ============ */
+.tag-btns { display: flex; justify-content: center; gap: 8px; }
+.dupe-group-head { font-size: 12px; color: var(--dim); padding: 10px 0 4px; font-weight: 600; }
+.dupe-row {
+  display: flex; align-items: center; gap: 8px; padding: 7px 4px;
+  border-bottom: 1px solid var(--line); font-size: 13px; color: var(--fg); cursor: pointer;
+}
+.dupe-row.keep { color: var(--accent); font-weight: 500; }
+.dupe-row input { flex: 0 0 auto; }
+.toolbar { margin-bottom: 12px; display: flex; gap: 8px; padding: 0 12px; }
+#oplDetailHead, #mylistDetailHead, #localDetailHead { margin-bottom: 12px; padding: 12px; }
+/* 详情页头部通栏无留白（光晕背景铺到屏幕两侧；顶部去 padding 防顶栏接缝） */
+#oplDetailHead { padding: 0 0 4px; margin-bottom: 4px; }
+#pageOplDetail.page { padding-top: 0; }
+#oplDetailHead .name, #mylistDetailHead .name, #localDetailHead .name { font-size: 16px; font-weight: 600; }
+#oplDetailHead .meta, #mylistDetailHead .meta, #localDetailHead .meta { font-size: 12px; color: var(--dim); margin-top: 4px; }
+.demo-tag { display: inline-block; font-size: 10px; padding: 0 4px; border-radius: 3px; border: 1px solid var(--accent); color: var(--accent); margin-left: 4px; vertical-align: 1px; font-weight: 500; }
+
+/* ============ 我的页 ============ */
+/* 顶部导航区 */
+.me-top-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; height: 44px;
+}
+.me-top-tabs { display: flex; gap: 18px; }
+.me-page-title { font-size: 20px; font-weight: 800; color: var(--fg); }
+.me-top-tab {
+  background: transparent; border: none; color: var(--dim);
+  font-size: 16px; font-weight: 500; padding: 4px 0; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+}
+.me-top-tab.active { color: var(--fg); font-weight: 700; border-bottom-color: var(--accent); }
+.me-top-icons { display: flex; gap: 2px; }
+
+/* 用户信息头部 */
+.me-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 12px; margin-bottom: 8px;
+  background: var(--bg2); border-radius: 12px; margin: 0 12px 12px;
+}
+/* 广告横幅区 */
+.me-ad-banner {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 12px 10px; padding: 12px 14px;
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2); border-radius: 12px;
+}
+.me-ad-icon { font-size: 24px; color: #ff9800; flex: 0 0 auto; }
+.me-ad-text { flex: 1; }
+.me-ad-title { font-size: 15px; font-weight: 700; color: var(--fg); }
+.me-ad-sub { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.me-ad-logo { font-size: 20px; color: var(--accent); }
+.me-ad-close { background: none; border: none; color: var(--dim); font-size: 16px; cursor: pointer; }
+/* 用户信息头部区 */
+.me-hero {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 16px;
+  margin: 4px 12px 16px; padding: 18px 18px;
+  border-radius: 20px;
+  background-color: var(--accent);
+  background-image: var(--grad);
+  background-size: cover; background-position: center;
+  box-shadow: 0 10px 28px rgba(20, 24, 32, .18);
+  color: #fff;
+}
+.me-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.28)); pointer-events: none; }
+.me-hero > * { position: relative; z-index: 1; }
+.me-hero-custom { position: absolute; top: 10px; right: 10px; z-index: 2; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 9px; background: rgba(0,0,0,.28); color: #fff; cursor: pointer; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.me-hero-custom svg { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.me-avatar-big {
+  width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,.22);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; color: #fff; flex: 0 0 auto;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.55);
+  background-size: cover; background-position: center; cursor: pointer;
+}
+.me-avatar-big svg { width: 36px; height: 36px; stroke: #fff; }
+.me-avatar-big.has-img svg { display: none; }
+.me-hero-info { flex: 1; min-width: 0; }
+.me-user-name { font-size: 20px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,.35); }
+.me-name-edit { background: none; border: none; padding: 2px; margin-left: 4px; vertical-align: middle; cursor: pointer; color: rgba(255,255,255,.85); }
+.me-name-edit svg { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; }
+.me-hero-stats { display: flex; gap: 8px; margin-top: 12px; }
+.me-hstat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 7px 4px; border-radius: 12px; background: rgba(255,255,255,.16); }
+.me-hstat b { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.1; }
+.me-hstat span { font-size: 11px; color: rgba(255,255,255,.82); }
+.me-user-arrow { font-size: 16px; color: var(--dim); }
+.me-user-coin { font-size: 13px; color: var(--dim); margin-top: 6px; }
+.me-user-coin span { font-weight: 700; color: var(--fg); }
+/* 等级与标签区 */
+.me-level-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px; margin-bottom: 10px;
+}
+.me-level-info { font-size: 12px; color: var(--dim); }
+.me-level-tags { display: flex; gap: 6px; }
+.me-level-tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+/* 会员中心区块 */
+.me-vip-block {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 0 12px; padding: 14px 16px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 12px;
+}
+.me-vip-title { font-size: 16px; font-weight: 700; color: #ffd700; }
+.me-vip-sub { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 2px; }
+.me-vip-btn {
+  background: linear-gradient(135deg, #ffd700, #ffb300); color: #1a1a2e;
+  border: none; border-radius: 16px; padding: 6px 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.me-listen-stat {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; margin: 0 12px 10px;
+}
+.me-listen-hours { font-size: 16px; font-weight: 700; color: var(--fg); }
+.me-listen-sign { font-size: 13px; color: var(--dim); cursor: pointer; }
+.me-listen-sign-sub { font-size: 14px; }
+/* 任务横幅区 */
+.me-task-banner {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 12px 12px; padding: 12px 14px;
+  background: #e3f2fd; border-radius: 12px; position: relative;
+}
+.me-task-icon { font-size: 24px; color: var(--accent); flex: 0 0 auto; }
+.me-task-text { flex: 1; font-size: 14px; font-weight: 600; color: var(--fg); }
+.me-task-btn {
+  background: var(--accent); color: #fff; border: none; border-radius: 14px;
+  padding: 5px 14px; font-size: 12px; cursor: pointer;
+}
+.me-task-close {
+  position: absolute; top: 6px; right: 8px; background: none; border: none;
+  color: var(--dim); font-size: 14px; cursor: pointer;
+}
+.me-avatar {
+  width: 56px; height: 56px; border-radius: 50%; background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: #fff; flex: 0 0 auto;
+}
+.me-user-info { flex: 1; min-width: 0; }
+.me-nickname { font-size: 18px; font-weight: 700; color: var(--fg); }
+.me-user-tag { font-size: 12px; color: var(--dim); margin-top: 4px; }
+
+/* 五宫格数据统计 */
+.me-stats {
+  display: flex; justify-content: space-around; padding: 12px; margin-bottom: 8px;
+  background: var(--bg2); border-radius: 12px; margin: 0 12px 12px;
+}
+.me-stat-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; padding: 4px 2px;
+}
+.me-stat-icon { font-size: 22px; }
+.me-stat-label { font-size: 11px; color: var(--dim); }
+.me-stat-num { font-size: 15px; font-weight: 700; color: var(--fg); }
+/* 胶囊播放按钮（我喜欢旁边的▶+数字） */
+.me-stat-play {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--accent); color: #fff; border: none; border-radius: 12px;
+  padding: 3px 10px; font-size: 11px; cursor: pointer;
+  margin-top: 4px;
+}
+.me-stat-play span:first-child { font-size: 10px; }
+
+/* 分区标题 + 右箭头 */
+.me-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px; margin-bottom: 10px;
+}
+.me-more { font-size: 18px; color: var(--dim); cursor: pointer; }
+
+.me-section { margin-bottom: 18px; }
+.me-title { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; color: var(--fg); }
+.me-title::before { content: ''; width: 4px; height: 15px; border-radius: 3px; background: var(--accent); }
+.me-count { font-size: 13px; color: var(--dim); font-weight: 400; margin-left: 4px; }
+
+/* 横滑最近播放卡片 */
+.me-recent-scroll {
+  display: flex; gap: 10px; padding: 0 12px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.me-recent-scroll::-webkit-scrollbar { display: none; }
+.me-recent-card {
+  flex: 0 0 100px; border-radius: 12px; overflow: hidden;
+  background: var(--bg2); box-shadow: var(--shadow-sm);
+}
+.me-recent-card-cover { width: 100px; height: 100px; object-fit: cover; background: var(--bg); }
+.me-recent-card-title {
+  font-size: 11px; padding: 6px 8px; color: var(--fg);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 歌单筛选区 */
+.me-pl-filter {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px; margin-bottom: 10px;
+}
+.me-pl-tags { display: flex; gap: 8px; }
+.me-pl-tag {
+  background: transparent; border: 1px solid var(--line); border-radius: 14px;
+  color: var(--dim); font-size: 12px; padding: 4px 12px; cursor: pointer;
+  transition: all .15s;
+}
+.me-pl-tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.me-pl-ops { display: flex; gap: 2px; }
+.me-new-pl { opacity: .7; }
+.opl-card-icon {
+  width: 50px; height: 50px; border-radius: 8px;
+  background: var(--bg); border: 1px dashed var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--dim); flex: 0 0 auto;
+}
+
+/* ============ 弹窗 ============ */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
+  animation: fadeIn .15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.overlay-box {
+  width: 85%; max-width: 360px; background: var(--bg2);
+  border-radius: 12px; padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.20);
+  animation: popIn .2s ease;
+}
+@keyframes popIn { from { opacity: 0; transform: scale(.95) translateY(4px); } to { opacity: 1; transform: none; } }
+.overlay-title { font-size: 16px; font-weight: 600; margin-bottom: 14px; color: var(--fg); }
+.overlay-box input {
+  width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--fg);
+  border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-bottom: 14px; outline: none;
+  transition: border-color .2s;
+}
+.overlay-box input:focus { border-color: var(--accent); }
+.overlay-box .row { justify-content: flex-end; }
+
+/* ============ 底部播放条（迷你播放器：左右留边全圆角；详情页下滑与底栏贴合） ============ */
+#playerBar {
+  position: fixed; left: 8px; right: 8px; bottom: calc(52px + var(--safe-bottom));
+  z-index: 30; border-radius: 18px; overflow: hidden; background: #fff;
+  transition: bottom .3s cubic-bezier(.22, .61, .36, 1);
+}
+#playerBar::before {
+  content: ''; position: absolute; inset: -28px;
+  background-image: var(--pb-img, none); background-size: cover; background-position: center;
+  filter: blur(26px) saturate(1.6) brightness(1.06); opacity: .55;
+}
+#playerBar > * { position: relative; z-index: 1; }
+html[data-theme="dark"] #playerBar { background: #1e1e1e; }
+.pb-banner {
+  display: flex; align-items: center; gap: 8px;
+  background: #fff0f0; padding: 6px 12px;
+}
+.pb-banner-icon { color: #ff4757; font-size: 14px; }
+.pb-banner-text { flex: 1; font-size: 12px; color: #666; }
+.pb-banner-arrow { color: #ccc; font-size: 14px; }
+.pb-main {
+  display: flex; align-items: center; gap: 10px;
+  background: transparent; border-top: none;
+  padding: 6px 12px; height: 69px;
+}
+#pbCover { width: 48px; height: 48px; border-radius: 10px; overflow: hidden; background: var(--bg); flex: 0 0 auto; }
+#pbCoverImg { width: 100%; height: 100%; object-fit: cover; }
+#pbInfo { flex: 1; min-width: 0; }
+#pbTitle { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fg); }
+#pbArtist { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.pb-ctrls { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
+.pb-ctrls .icon-btn { font-size: 20px; color: var(--fg); padding: 4px 6px; }
+#pbFav { font-size: 22px; color: var(--fg); }
+#pbFav.faved { color: #ff8fa0; }
+
+/* ============ 断点续播恢复条（悬浮圆角） ============ */
+#resumeBar {
+  position: fixed; left: 12px; right: 12px; bottom: calc(134px + var(--safe-bottom));
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg2); border: none; border-radius: 14px;
+  padding: 10px 12px; z-index: 40;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+  animation: slideUp .2s ease;
+}
+#resumeBar .resume-info { flex: 1; min-width: 0; }
+#resumeBar .resume-title { font-size: 13px; color: var(--fg); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#resumeBar .resume-meta { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+#resumeBar .resume-go { flex: 0 0 auto; padding: 6px 16px; font-size: 13px; }
+
+/* ============ 批量操作条（浮层卡片：白底毛玻璃+描边图标列） ============ */
+#batchBar {
+  position: fixed; left: 12px; right: 12px;
+  bottom: calc(132px + var(--safe-bottom));
+  z-index: 40; pointer-events: none;
+}
+body.detail-immersive #batchBar { bottom: calc(88px + var(--safe-bottom)); }
+.bb-inner {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255, 255, 255, .94);
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  border: 1px solid rgba(0, 0, 0, .05); border-radius: 18px;
+  padding: 8px 10px 8px 14px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .14), 0 2px 6px rgba(0, 0, 0, .05);
+  animation: bbUp .24s cubic-bezier(.22, .9, .32, 1);
+}
+@keyframes bbUp { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+html[data-theme="dark"] .bb-inner { background: rgba(28, 28, 30, .94); border-color: rgba(255,255,255,.08); }
+.bb-count { font-size: 12px; color: var(--accent); font-weight: 600; white-space: nowrap; flex: 0 0 auto; }
+.bb-acts { flex: 1; display: flex; justify-content: space-evenly; align-items: center; }
+.bb-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: none; cursor: pointer;
+  color: #333; padding: 4px 8px; min-width: 48px;
+}
+.bb-btn:active { opacity: .55; }
+.bb-btn span { font-size: 11px; letter-spacing: .5px; }
+html[data-theme="dark"] .bb-btn { color: #ddd; }
+.bb-exit {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .06); border: none; color: #666; cursor: pointer;
+}
+.bb-exit:active { opacity: .6; }
+html[data-theme="dark"] .bb-exit { background: rgba(255,255,255,.1); color: #ccc; }
+
+/* ============ 批量勾选 ============ */
+.b-check {
+  flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%;
+  border: 1.6px solid #bbb;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 700; line-height: 1;
+  background: transparent; transition: background .14s, border-color .14s;
+}
+.b-check.on { background: var(--accent); border-color: var(--accent); }
+.song-row.b-sel { background: rgba(44,162,249,.06); }
+.song-row.b-sel .t { color: var(--accent); }
+#oplDetailList .song-row.b-sel { background: #f4f9ff; }
+#oplDetailList .song-row.b-sel .t { color: var(--accent); }
+
+/* ============ 播放页（沉浸式封面模糊背景） ============ */
+.full-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; flex-direction: column;
+  animation: fadeIn .25s ease; overflow: hidden;
+}
+.pp-bg {
+  position: absolute; inset: -40px; z-index: 0; background: #1a0a0a;
+}
+.pp-bg img { width: 100%; height: 100%; object-fit: cover; filter: blur(60px) saturate(1.2) brightness(0.35); }
+.pp-mask {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(0,0,0,.2) 0%, rgba(0,0,0,.5) 100%);
+}
+.pp-top-bar {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
+}
+.pp-icon-white { color: rgba(255,255,255,.9) !important; }
+.pp-icon-green { color: #4ade80 !important; }
+.pp-capsule {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.12); border-radius: 20px;
+  padding: 6px 14px; flex: 0 1 auto; max-width: 55%;
+}
+.pp-capsule-icon { font-size: 14px; color: #7dd3fc; }
+.pp-capsule-text { font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+.pp-capsule-arrow { font-size: 14px; color: rgba(255,255,255,.5); }
+.pp-top-right { display: flex; gap: 4px; }
+.pp-cover-area {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  flex: 1 1 auto; min-height: 0; margin: 12px 0 8px;
+}
+.pp-cover {
+  width: min(60vw, 240px); aspect-ratio: 1; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+}
+.pp-cover img { width: 100%; height: 100%; object-fit: cover; }
+.pp-disc-edge {
+  position: absolute; right: calc(50% - min(30vw, 120px) - 8px); top: 50%;
+  transform: translateY(-50%);
+  width: min(55vw, 220px); height: min(55vw, 220px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,200,200,.15) 30%, rgba(255,200,200,.06) 60%, transparent 70%);
+  border: 2px solid rgba(255,200,200,.12); z-index: -1;
+}
+.pp-lyric-area {
+  position: relative; z-index: 2;
+  text-align: center; padding: 8px 20px; flex: 0 0 auto;
+}
+.pp-lyric-cur { font-size: 16px; font-weight: 600; color: rgba(255,255,255,.95); margin-bottom: 4px; min-height: 1.4em; }
+.pp-lyric-next { font-size: 13px; color: rgba(255,255,255,.4); min-height: 1.2em; }
+.pp-info { position: relative; z-index: 2; padding: 8px 20px; text-align: left; }
+.pp-song-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.pp-song-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pp-song-meta span:first-child { font-size: 14px; color: rgba(255,255,255,.6); }
+.pp-tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
+.pp-actions { position: relative; z-index: 2; display: flex; justify-content: space-around; align-items: center; padding: 6px 16px; }
+.pp-actions .icon-btn { font-size: 20px; color: rgba(255,255,255,.8); padding: 8px; }
+.pp-progress { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 4px 20px; }
+.pp-time { font-size: 11px; color: rgba(255,255,255,.5); min-width: 36px; text-align: center; font-variant-numeric: tabular-nums; }
+.pp-seek { flex: 1; height: 3px; -webkit-appearance: none; appearance: none; background: rgba(255,255,255,.2); border-radius: 2px; outline: none; }
+.pp-seek::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); cursor: pointer; }
+.pp-controls { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-around; padding: 10px 24px calc(12px + var(--safe-bottom)); }
+.pp-controls .icon-btn { font-size: 24px; color: rgba(255,255,255,.85); padding: 10px; }
+.pp-play-btn {
+  width: 64px; height: 64px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,.15); color: #fff; font-size: 28px;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.3); transition: transform .12s;
+}
+.pp-play-btn:active { transform: scale(.92); }
+
+/* ============ 全页歌词层（点击两行歌词区展开，对齐 PC 歌曲详情页歌词） ============ */
+#ppLyricFull {
+  position: absolute; left: 0; right: 0;
+  top: calc(env(safe-area-inset-top, 0px) + 56px); bottom: calc(16px + var(--safe-bottom));
+  z-index: 3; display: none; flex-direction: column;
+  overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  padding: 10px 22px 30px;
+  background: linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,.18) 18%, rgba(0,0,0,.18) 82%, rgba(0,0,0,.45) 100%);
+}
+#ppLyricFull:not(.hidden) { display: flex; }
+#ppLyricFull::-webkit-scrollbar { display: none; }
+.pfl-top { flex: 0 0 auto; text-align: center; font-size: 11px; color: rgba(255,255,255,.35); padding-bottom: 6px; }
+#lyricBox { flex: 1 1 auto; }
+#lyricBox .lyric-line {
+  padding: 9px 0; text-align: center; cursor: pointer;
+  font-size: 15px; line-height: 1.55; color: rgba(255,255,255,.42);
+  transition: color .2s, transform .2s;
+}
+#lyricBox .lyric-line.cur { color: #fff; font-weight: 600; font-size: 16px; }
+/* 歌词扫色：当前行按进度渐变填充（照 PC sweepStyle） */
+#lyricBox .lyric-line.cur.sweep, .pp-lyric-cur.sweep {
+  background: linear-gradient(90deg, var(--lyr-sung, #4deaff) 0 var(--p, 0%), rgba(255, 255, 255, .38) var(--p, 0%) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  text-shadow: 0 0 14px rgba(77, 234, 255, .18);
+}
+#lyricBox .lyric-line.cur.sweep span { -webkit-text-fill-color: transparent; color: transparent; }
+.q-now { color: var(--accent); margin-right: 4px; vertical-align: -2px; }
+.q-now svg { stroke: var(--accent); }
+#lyricBox .lyric-line .lrc-trans { font-size: 12px; color: rgba(255,255,255,.30); margin-top: 3px; }
+#lyricBox .lyric-line.cur .lrc-trans { color: rgba(255,255,255,.55); }
+#lyricBox .lyric-line span.wcur { color: var(--accent); }
+#playerPage.lyric-full .pp-cover-area,
+#playerPage.lyric-full .pp-info,
+#playerPage.lyric-full .pp-lyric-area,
+#playerPage.lyric-full .pp-actions,
+#playerPage.lyric-full .pp-progress,
+#playerPage.lyric-full .pp-controls { visibility: hidden; }
+
+/* ============ 歌单详情页内搜索框 ============ */
+.detail-filter {
+  display: block; width: calc(100% - 24px); margin: 0 12px 8px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
+  color: var(--fg); font-size: 13px; padding: 8px 14px; outline: none;
+  transition: border-color .2s;
+}
+.detail-filter:focus { border-color: var(--accent); }
+.detail-filter::placeholder { color: var(--dim); }
+
+/* 播放页：迷你播放条隐藏；底栏常驻并改为深色玻璃样式，
+   与播放页封面模糊背景（.pp-bg 全屏铺底）视觉连续；
+   播放控件与全页歌词底部预留底栏高度（52px），避免重叠 */
+body.pp-open #playerBar { display: none; }
+body.pp-open #bottomNav {
+  z-index: 65; /* 高于播放页(60)，低于队列抽屉(70)/toast(100) */
+  background: rgba(13, 15, 22, .58);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+body.pp-open .nav-item { color: rgba(255, 255, 255, .5); }
+body.pp-open .nav-item .nav-ic { stroke: rgba(255, 255, 255, .55); }
+body.pp-open .nav-item.active { color: var(--accent2); }
+body.pp-open .nav-item.active .nav-ic { stroke: var(--accent2); stroke-width: 2.2; }
+body.pp-open .nav-item[data-view="me"].active .nav-ic { fill: var(--accent2); stroke: var(--accent2); stroke-width: 1.8; }
+body.pp-open .pp-controls { padding-bottom: calc(64px + var(--safe-bottom)); }
+body.pp-open #ppLyricFull { bottom: calc(16px + var(--safe-bottom) + 52px); }
+
+/* ============ 底部导航（酷狗风格：白底 + 顶部线条 + 选中蓝色文字） ============ */
+#bottomNav {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  z-index: 40; display: flex;
+  background: var(--bg2);
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  height: calc(52px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  transition: transform .3s cubic-bezier(.22, .61, .36, 1);
+}
+/* 歌单详情页：底栏滑出屏幕，迷你条下移补位 */
+body.detail-immersive #bottomNav { transform: translateY(100%); }
+body.detail-immersive #playerBar { bottom: calc(8px + var(--safe-bottom)); }
+.nav-item {
+  flex: 1; background: transparent; border: none; color: var(--dim);
+  font-size: 10px; font-weight: 500; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  transition: color .15s;
+  padding-top: 4px;
+}
+.nav-item .nav-ic {
+  width: 22px; height: 22px; stroke: #b8bec8; fill: none; stroke-width: 1.8;
+  transition: fill .15s, stroke .15s;
+}
+.nav-item.active { color: #555; }
+.nav-item.active .nav-ic { fill: none; stroke: #555; stroke-width: 2.2; }
+/* 我的涂黑 */
+.nav-item[data-view="me"].active .nav-ic { fill: #555; stroke: #555; stroke-width: 1.8; }
+
+/* ============ 分段控件 ============ */
+.seg {
+  display: flex; background: var(--bg); border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--line); padding: 2px; gap: 2px;
+}
+.seg-item {
+  flex: 1; background: transparent; border: none; color: var(--dim);
+  padding: 6px 10px; font-size: 13px; cursor: pointer; white-space: nowrap;
+  border-radius: 4px; transition: background .15s, color .15s;
+}
+.seg-item.active { background: var(--accent); color: #fff; font-weight: 500; }
+.seg.multi .seg-item { flex: 0 1 auto; padding: 6px 10px; }
+
+/* ============ 设置行 ============ */
+.set-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 13px 16px; border-bottom: none;
+  background: var(--bg2);
+}
+.set-row:last-child { border-bottom: none; }
+.set-row > span { font-size: 15px; font-weight: 500; color: var(--fg); }
+.set-row > span:first-child { flex: 0 0 auto; min-width: 78px; }
+.set-row .seg { flex: 0 1 auto; }
+.set-range-row { gap: 10px; }
+.set-range-row input[type="range"] {
+  flex: 1; min-width: 0; height: 3px; -webkit-appearance: none; appearance: none;
+  background: var(--line); border-radius: 2px; outline: none;
+}
+.set-range-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,.3); cursor: pointer;
+}
+.set-range-val { flex: 0 0 auto; min-width: 34px; text-align: right; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+/* 强调色圆点 */
+.acc-dots { display: flex; gap: 10px; }
+.acc-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.18); transition: transform .12s; }
+.acc-dot:active { transform: scale(.9); }
+.acc-dot.active { border-color: var(--fg); box-shadow: 0 0 0 2px var(--bg2), 0 0 0 4px var(--accent); }
+/* 选择弹层（皮肤 / 预设） */
+.pick-box { max-width: 460px; width: 100%; }
+.pick-box .sheet-title { display: flex; align-items: center; justify-content: space-between; font-size: 15px; color: var(--fg); font-weight: 600; }
+.sheet-x { color: var(--dim); }
+.pick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 8px 2px 4px; }
+.skin-card, .preset-card { display: flex; flex-direction: column; align-items: center; gap: 6px; background: transparent; border: none; cursor: pointer; padding: 4px; }
+.skin-sw, .preset-sw { width: 100%; height: 56px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.14); border: 2px solid transparent; }
+.skin-nm, .preset-nm { font-size: 12px; color: var(--fg); }
+.skin-card.active .skin-sw, .preset-card.active .preset-sw { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.skin-sw[data-skin="default"] { background: linear-gradient(160deg,#f5f5f5,#e5e5e5); }
+.skin-sw[data-skin="applered"] { background: linear-gradient(160deg,#2a0d0d,#4a1818 40%,#140a0a); }
+.skin-sw[data-skin="kugouneon"] { background: linear-gradient(160deg,#1a0533,#3d1168 45%,#062b38); }
+.skin-sw[data-skin="netease"] { background: linear-gradient(160deg,#f8f6f4,#e8e2dd); }
+.skin-sw[data-skin="qqdark"] { background: linear-gradient(160deg,#0b1e2d,#123246 55%,#0a1620); }
+.skin-sw[data-skin="spotifyw"] { background: linear-gradient(160deg,#ffffff,#f2f2f2); }
+.skin-sw[data-skin="xuancai"] { background: linear-gradient(135deg,#ff2d78,#a44dff 35%,#3d8bff 65%,#00e5a8); }
+.skin-sw[data-skin="huancai"] { background: linear-gradient(115deg,#ff50a0,#785aff 30%,#00dcff 60%,#ffbe3c); }
+/* 局域网同步弹层 */
+.lan-hint { font-size: 12px; color: var(--dim); line-height: 1.6; margin: 2px 2px 12px; }
+.lan-input { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 14px; }
+.lan-input:focus { border-color: var(--accent); outline: none; }
+.lan-status { min-height: 18px; font-size: 12px; color: var(--dim); margin: 2px 2px 8px; }
+.lan-status.ok { color: #22c07a; } .lan-status.err { color: #ff5a6e; }
+.lan-go { width: 100%; margin-top: 2px; }
+.lan-scan-btn { align-self: flex-start; margin: 0 0 8px; font-size: 13px; padding: 6px 14px; }
+.lan-found { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.lan-found-item { text-align: left; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--fg); cursor: pointer; }
+.lan-found-item.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.lan-found-empty { font-size: 12px; color: var(--dim); padding: 2px 0 6px; }
+/* v4 绑定层：已绑定电脑列表 + 自动同步开关 + 分区标签 */
+.lan-sec-label { font-size: 12px; font-weight: 700; color: var(--dim); margin: 4px 2px 8px; letter-spacing: .5px; }
+.lan-bound { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.lan-bound-empty { font-size: 12px; color: var(--dim); padding: 6px 2px 10px; }
+.lan-bound-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.lan-bound-info { min-width: 0; }
+.lan-bound-name { font-size: 14px; font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lan-bound-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.lan-bound-un { flex: 0 0 auto; font-size: 12px; color: #ff5a6e; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; cursor: pointer; }
+.lan-row-switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--fg); margin: 2px 2px 12px; }
+.lan-now-btn { width: 100%; margin-bottom: 16px; }
+.st-switch { position: relative; display: inline-block; width: 44px; height: 26px; flex: 0 0 auto; }
+.st-switch input { opacity: 0; width: 0; height: 0; }
+.st-slider { position: absolute; inset: 0; background: var(--line); border-radius: 26px; transition: background .2s; }
+.st-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.st-switch input:checked + .st-slider { background: var(--accent); }
+.st-switch input:checked + .st-slider::before { transform: translateX(18px); }
+/* 本地账号 */
+.me-curacc-avatar { display: inline-block; width: 30px; height: 30px; border-radius: 50%; background: var(--bg); background-size: cover; background-position: center; vertical-align: middle; text-align: center; line-height: 30px; font-size: 14px; color: var(--dim); overflow: hidden; }
+.acc-mgr-list { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; }
+.acc-mgr-item { display: flex; align-items: center; gap: 10px; padding: 10px 6px; border-radius: 12px; cursor: pointer; }
+.acc-mgr-item:active { background: var(--bg); }
+.acc-mgr-item.cur { background: var(--bg); }
+.acc-mgr-av { width: 34px; height: 34px; border-radius: 50%; background: var(--bg); background-size: cover; background-position: center; flex: 0 0 auto; text-align: center; line-height: 34px; color: var(--dim); overflow: hidden; }
+.acc-mgr-nm { flex: 1; min-width: 0; font-size: 15px; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acc-mgr-ck { color: var(--accent); font-weight: 700; }
+.acc-mgr-del { border: none; background: transparent; color: var(--dim); font-size: 13px; cursor: pointer; padding: 4px 8px; }
+.acc-mgr-del.warn { color: #ff5a6e; font-weight: 600; }
+
+
+/* ============ 描边 SVG 图标（全 app 统一：继承 currentColor，与底栏一致） ============ */
+.ic-svg { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -4px; }
+.ic-svg .ic-f { fill: currentColor; stroke: none; }
+.ic-svg .ic-thick { stroke-width: 2.6; }
+.pp-play-btn .ic-svg { vertical-align: 0; }
+button .ic-svg { pointer-events: none; }
+
+/* ============ 歌曲行徽章（对齐 PC song-tag 三槽配色：在线/来源/音质） ============ */
+.st {
+  display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 999px;
+  margin-left: 4px; vertical-align: 1px; font-weight: 700; line-height: 1.5; border: 1px solid;
+  white-space: nowrap;
+}
+.st-online { color: #2f6bff; background: rgba(47,107,255,.14); border-color: rgba(47,107,255,.35); }
+.st-local { color: #1a1a1a; background: rgba(128,128,128,.16); border-color: transparent; }
+.st-src-netease { color: #d43c33; background: rgba(212,60,51,.10); border-color: rgba(212,60,51,.34); }
+.st-src-kugou { color: #1f8fd6; background: rgba(31,143,214,.10); border-color: rgba(31,143,214,.34); }
+.st-src-qq { color: #22a866; background: rgba(34,168,102,.10); border-color: rgba(34,168,102,.34); }
+.st-src-local { color: #c9971c; background: rgba(201,151,28,.10); border-color: rgba(201,151,28,.34); }
+.st-src-other { color: #a855f7; background: rgba(168,85,247,.10); border-color: rgba(168,85,247,.34); }
+.st-q-standard { color: #4d8bff; background: rgba(77,139,255,.14); border-color: rgba(77,139,255,.36); }
+.st-q-high { color: #a06bff; background: rgba(160,107,255,.13); border-color: rgba(160,107,255,.36); }
+.st-q-lossless {
+  color: #cb9f27; border-color: rgba(212,168,52,.58);
+  background: linear-gradient(135deg, rgba(252,224,130,.70), rgba(235,190,70,.42));
+}
+/* 深色主题亮色变体（照 PC 深色徽章） */
+html[data-theme="dark"] .st-online { color: #7fb2ff; }
+html[data-theme="dark"] .st-local { color: #dddddd; }
+html[data-theme="dark"] .st-src-netease { color: #ff7a6e; }
+html[data-theme="dark"] .st-src-kugou { color: #6cc0f5; }
+html[data-theme="dark"] .st-src-qq { color: #5fd39b; }
+html[data-theme="dark"] .st-src-local { color: #e8c25f; }
+html[data-theme="dark"] .st-q-standard { color: #8fb6ff; }
+html[data-theme="dark"] .st-q-high { color: #c3a3ff; }
+html[data-theme="dark"] .st-q-lossless { color: #f2dc9a; }
+
+/* ============ 歌单详情头部（对齐 PC pl-mode 大封面卡 + 渐变按钮） ============ */
+.dh { display: flex; gap: 12px; align-items: center; padding: 14px 12px; }
+.dh-cover {
+  width: 76px; height: 76px; border-radius: 12px; overflow: hidden;
+  flex: 0 0 auto; background: var(--bg); box-shadow: 0 4px 14px rgba(10,14,26,.20);
+}
+.dh-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dh-info { flex: 1; min-width: 0; }
+.dh-name { font-size: 19px; font-weight: 700; line-height: 1.25; letter-spacing: .2px; color: var(--fg); word-break: break-word; }
+.dh-sub {
+  display: inline-block; font-size: 11.5px; color: var(--dim);
+  background: var(--bg); padding: 2px 10px; border-radius: 999px; margin: 5px 0 9px;
+}
+.dh-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.dh-btn { border: none; border-radius: 9px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.dh-btn.dh-play { background: var(--bg2); color: var(--accent); border: 1px solid var(--accent); }
+.dh-btn.dh-dl {
+  background: var(--grad); color: #fff; letter-spacing: .3px;
+  box-shadow: 0 3px 10px rgba(44,162,249,.28);
+}
+.dh-btn.dh-rename { background: var(--bg2); color: var(--fg); border: 1px solid var(--line); }
+.dh-btn.dh-ghost { background: var(--bg2); color: var(--fg); border: 1px solid var(--line); padding: 7px 10px; }
+
+/* ============ 详情页筛选弹层标签（照 PC fp-row） ============ */
+.fp-label { font-size: 12px; color: var(--dim); margin: 10px 0 6px; }
+
+/* ============ 详情页封面墙（照 PC grid-card：1:1 封面 + 标题 + 艺术家） ============ */
+.g-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  padding: 6px 12px 20px;
+}
+.g-grid .grid-card { min-width: 0; cursor: pointer; }
+.grid-card .gc-cover {
+  width: 100%; aspect-ratio: 1; border-radius: 14px; overflow: hidden; position: relative;
+  background: linear-gradient(135deg, #e8ebf2, #dfe3ee);
+  display: flex; align-items: center; justify-content: center;
+}
+html[data-theme="dark"] .grid-card .gc-cover { background: linear-gradient(135deg, #2a3145, #232b41); }
+.grid-card .gc-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.grid-card .gc-cover::after {
+  content: ''; position: absolute; inset: 0; background: rgba(74,125,255,.30);
+  opacity: 0; transition: opacity .15s;
+}
+.grid-card.playing .gc-cover::after { opacity: 1; }
+.grid-card .gc-title { font-size: 13px; font-weight: 600; color: var(--fg); margin-top: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grid-card .gc-sub { font-size: 11.5px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ============ 进度条样式 B 细线式（照 PC progress-b） ============ */
+#playerPage.progress-b .pp-seek {
+  height: 3px; border-radius: 3px; background: rgba(128,128,128,.32);
+}
+#playerPage.progress-b .pp-seek::-webkit-slider-thumb {
+  width: 12px; height: 12px; border: 2px solid #fff; background: var(--accent);
+  box-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+
+/* ============ 队列抽屉 ============ */
+.drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; width: min(80vw, 300px);
+  background: var(--bg2); z-index: 70;
+  display: flex; flex-direction: column;
+  box-shadow: -2px 0 8px rgba(0,0,0,.15);
+  animation: drawerIn .2s ease;
+}
+@keyframes drawerIn { from { transform: translateX(100%); } to { transform: none; } }
+.drawer-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 12px; border-bottom: 1px solid var(--line); font-weight: 600; font-size: 15px;
+}
+#queueList { flex: 1; overflow-y: auto; padding: 0 0 16px; }
+#queuePanel { top: 8px; bottom: 8px; right: 8px; width: min(82vw, 320px); border-radius: 20px; box-shadow: -6px 0 26px rgba(0,0,0,.24); }
+#queuePanel .song-row { height: 58px; }
+#queuePanel .song-row .cov { width: 46px; height: 46px; }
+#ppLyricsBtn.active { color: var(--accent2); }
+#ppLyricsBtn.active svg { stroke: var(--accent2); }
+#ppLyricsBtn.active svg text { fill: var(--accent2); }
+.me-new-pl { margin-top: 10px; }
+#oplRecentList { -webkit-mask-image: none; mask-image: none; }
+#mylistList { -webkit-mask-image: none; mask-image: none; }
+
+/* ============ 下载任务行 ============ */
+.dl-list { margin-top: 8px; display: flex; flex-direction: column; }
+.dl-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  background: var(--bg2); border-bottom: 1px solid var(--line);
+}
+.dl-row .info { flex: 1; min-width: 0; }
+.dl-row .t { font-size: 13px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-row .a { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.dl-bar { width: 80px; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; flex: 0 0 auto; }
+.dl-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .3s; }
+.dl-file-list { max-height: 50vh; overflow-y: auto; margin-bottom: 10px; }
+.dl-file-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.dl-file-item .info { flex: 1; min-width: 0; }
+.dl-file-item .t { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-file-item .a { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.dl-file-item .ghost-btn { padding: 5px 10px; font-size: 12px; }
+
+/* ============ 本地页 ============ */
+#localRefreshBar { display: flex; align-items: center; gap: 8px; margin: 8px 12px 4px; }
+#localSearch {
+  margin: 8px 12px; width: calc(100% - 24px);
+  background: var(--bg2); color: var(--fg); border: 1px solid var(--line);
+  border-radius: 999px; padding: 8px 14px; font-size: 13px; outline: none;
+  transition: border-color .2s;
+}
+#localSearch:focus { border-color: var(--accent); }
+.artist-cov {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--accent); font-weight: 600; background: var(--grad-soft);
+  border: 1px solid var(--line);
+}
+.link { color: var(--accent); cursor: pointer; margin: 0 4px; font-weight: 500; }
+.link:active { opacity: .7; }
+
+/* ============ toast ============ */
+#toast {
+  position: fixed; left: 50%; bottom: calc(140px + var(--safe-bottom));
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.75);
+  color: #fff;
+  border: none; border-radius: 999px; padding: 8px 18px; font-size: 13px; z-index: 100;
+  opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; max-width: 80%; text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(-2px); }
+
+/* ============ 文本域 ============ */
+textarea {
+  width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--fg);
+  border-radius: 10px; padding: 10px 12px; font-size: 13px;
+  resize: vertical; min-height: 80px; outline: none;
+}
+textarea:focus { border-color: var(--accent); }
+
+/* ============ 桌面歌词颜色选择点 ============ */
+.color-dots { display: flex; gap: 8px; flex-wrap: wrap; }
+.color-dot {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  border: 2px solid var(--line); padding: 0;
+}
+.color-dot.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+
+/* 解析中：播放条标题旁轻量转圈（替代占屏 toast） */
+body.resolving #pbTitle::after {
+  content: '';
+  display: inline-block;
+  width: 10px; height: 10px;
+  border: 2px solid var(--dim);
+  border-top-color: transparent;
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+  animation: resolving-spin .8s linear infinite;
+}
+@keyframes resolving-spin { to { transform: rotate(360deg); } }
+
+/* ========== 批次25 UI 简洁化 ========== */
+/* 每日推荐横滑歌曲卡 */
+.daily-scroll { display: flex; overflow-x: auto; gap: 10px; padding: 2px 12px 6px; }
+.daily-scroll::-webkit-scrollbar { display: none; }
+.daily-card { flex: 0 0 auto; width: 104px; cursor: pointer; }
+.daily-card img { width: 104px; height: 104px; border-radius: 10px; object-fit: cover; display: block; background: var(--card, #eef2f6); }
+.daily-card-name { font-size: 12px; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.daily-card-artist { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.daily-card-tile { width: 104px; height: 104px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #4a5a72, #2b3441); }
+#dailyCount { cursor: pointer; user-select: none; }
+
+/* 推荐歌单双列网格 */
+.rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 12px; }
+.rec-grid-card { border-radius: 10px; overflow: hidden; cursor: pointer; background: var(--card, #f2f4f8); }
+.rec-grid-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.rec-grid-name { font-size: 12px; padding: 6px 8px 8px; line-height: 1.35; height: 2.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+/* 我的页设置分组标题 */
+.set-group-title { font-size: 12px; color: var(--accent); margin: 16px 0 2px; font-weight: 600; letter-spacing: 1px; }
+
+/* 推荐歌单横滑封面卡（批次25b：网格改横拉） */
+.rec-scroll { display: flex; overflow-x: auto; gap: 10px; padding: 2px 12px 6px; }
+.rec-scroll::-webkit-scrollbar { display: none; }
+.rec-card { flex: 0 0 auto; width: 118px; cursor: pointer; }
+.rec-card img { width: 118px; height: 118px; border-radius: 10px; object-fit: cover; display: block; background: var(--card, #eef2f6); }
+.rec-card-name { font-size: 12px; margin-top: 5px; line-height: 1.35; height: 2.7em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.rec-card, .rec-card-name { background: transparent !important; }
+
+/* 下拉刷新提示（批次27） */
+#pullHint { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 60; font-size: 12px; color: var(--dim); background: var(--card, rgba(255,255,255,.9)); padding: 4px 14px; border-radius: 14px; opacity: 0; pointer-events: none; transition: opacity .15s; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+/* ========== 批次28：首页高级感 + 物理下拉刷新 ========== */
+#pageSearch { position: relative; }
+#homeRecommend { position: relative; z-index: 1; will-change: transform; }
+.refresher { position: absolute; top: 52px; left: 0; right: 0; height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: var(--dim); pointer-events: none; z-index: 2; }
+.home-big-card-cover img, .daily-card img { transition: opacity .3s ease; }
+
+/* 大卡：整卡大封面 + 暗色渐变罩 + 白字（主流音乐 App 质感） */
+.home-big-card { position: relative; flex: 0 0 44%; border-radius: 16px; min-height: 122px; overflow: hidden; box-shadow: 0 6px 18px rgba(20, 24, 32, .14); background: linear-gradient(135deg, #3b4b66, #1d242e); }
+.hbb-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: background-image .3s; }
+.hbb-mask { position: absolute; inset: 0; background: linear-gradient(165deg, rgba(10, 14, 20, .12) 0%, rgba(10, 14, 20, .68) 100%); }
+.home-big-card-text { position: absolute; left: 13px; right: 12px; bottom: 11px; z-index: 1; display: flex; flex-direction: column; gap: 2px; }
+.home-big-card-title { font-size: 15px; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0, 0, 0, .45); }
+.home-big-card-sub { font-size: 12px; color: rgba(255, 255, 255, .82); text-shadow: 0 1px 3px rgba(0, 0, 0, .4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

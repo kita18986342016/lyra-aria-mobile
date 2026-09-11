@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">深空折韵</string>
+    <string name="title_activity_main">深空折韵</string>
+    <string name="package_name">com.lyraaria.mobile</string>
+    <string name="custom_url_scheme">com.lyraaria.mobile</string>
+</resources>

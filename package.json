@@ -1,0 +1,22 @@
+{
+  "name": "lyra-aria-mobile",
+  "productName": "深空折韵",
+  "version": "0.1.0",
+  "description": "深空折韵 · Android 版（Capacitor UI + 原生播放核）",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cap:init": "cap init 深空折韵 com.lyraaria.mobile --web-dir web",
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android",
+    "cap:open": "cap open android",
+    "apk": "cd android && gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/android": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

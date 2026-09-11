@@ -1,0 +1,8 @@
+{
+  "appId": "com.lyraaria.mobile",
+  "appName": "深空折韵",
+  "webDir": "web",
+  "android": {
+    "allowMixedContent": true
+  }
+}
