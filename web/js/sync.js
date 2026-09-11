@@ -72,7 +72,7 @@ export function mergeBundles(a, b) {
   const tomActive = (k, updatedAt) => tomAt(k) > (updatedAt || 0);
   const plMap = new Map();
   for (const p of (A.onlinePlaylists || [])) if (p && p.id) plMap.set(p.id, p);
-  for (const p of (B.onlinePlaylists || [])) { if (!p || !p.id) continue; const ex = plMap.get(p.id); if (!ex || (p.updatedAt || 0) >= (ex.updatedAt || 0)) plMap.set(p.id, p); }
+  for (const p of (B.onlinePlaylists || [])) { if (!p || !p.id) continue; const ex = plMap.get(p.id); if (!ex) plMap.set(p.id, p); else if ((p.updatedAt || 0) >= (ex.updatedAt || 0)) plMap.set(p.id, Object.assign({}, ex, p, { cover: p.cover || ex.cover || '' })); }
   for (const [id, p] of [...plMap]) { if (tomActive('pl:' + id, p.updatedAt)) plMap.delete(id); }
   const favMap = new Map();
   for (const f of (A.favorites || [])) if (f && f.source && f.ref) favMap.set(favKey(f), f);

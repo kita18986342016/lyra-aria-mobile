@@ -82,7 +82,7 @@ state.recent = LS.load('recent', []);
 state.dlDone = LS.load('dl', []);
 state.recentPls = LS.load('recpls', []);
 // 默认值对齐桌面：在线音质 高品(320)；下载音质 无损；翻译歌词默认开；倍速 1.0
-const PREF = Object.assign({ onlineQ: 'high', dlQ: 'lossless', sources: { netease: true, kugou: true }, lyrTrans: true, resume: true, theme: 'auto', accent: 'blue', skin: 'default', bgMode: 'cover', bgPreset: 'dusk', bgData: '', rate: 1, ambOn: 1, ambStrength: 60, ambBlur: 46, pStyle: 'B', lyrWin: 0, lyrFs: 18, lyrOp: 100, lyrBg: 1, lyrC1: '#4deaff', lyrC2: '#ffffff', lyrLocked: 0, lyrSweep: 'soft', lyrFont: 'default', fmAuto: 1, fmFresh: 0, nickname: '', avatar: '', heroCard: '', autoSync: 1 }, LS.load('prefs', {}));
+const PREF = Object.assign({ onlineQ: 'high', dlQ: 'lossless', sources: { netease: true, kugou: true }, lyrTrans: true, resume: true, theme: 'auto', accent: 'blue', skin: 'default', bgMode: 'cover', bgPreset: 'dusk', bgData: '', rate: 1, ambOn: 1, ambStrength: 60, ambBlur: 46, pStyle: 'B', lyrWin: 0, lyrFs: 18, lyrOp: 100, lyrBg: 1, lyrC1: '#4deaff', lyrC2: '#ffffff', lyrLocked: 0, lyrSweep: 'soft', lyrFont: 'default', fmAuto: 1, fmFresh: 0, autoSrc: 1, playMode: 'order', nickname: '', avatar: '', heroCard: '', autoSync: 1 }, LS.load('prefs', {}));
 try { document.documentElement.style.setProperty('--lyr-sung', PREF.lyrC1 || '#4deaff'); } catch (e) {}
 /* ---- 账号操作（数据按账号命名空间隔离；设置/外观为设备级不随账号） ---- */
 (function syncProfileFromAccount() { const a = curAccount(); if (a) { PREF.nickname = a.name || ''; PREF.avatar = a.avatar || ''; } })();
@@ -143,13 +143,13 @@ function renderAccManager() {
 const ICONS = {
   play: '<path d="M8.5 5.5v13l10-6.5z" class="ic-f"/>',
   pause: '<path d="M8.5 5.5v13M15.5 5.5v13" class="ic-thick"/>',
-  prev: '<path d="M7 5.5v13M17.5 6.5v11L10 12z"/>',
-  next: '<path d="M17 5.5v13M6.5 6.5v11L14 12z"/>',
+  prev: '<polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/>',
+  next: '<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/>',
   modeOrder: '<path d="M5 5.5v13l10-6.5z" class="ic-f"/><path d="M18.5 5.5v13" class="ic-thick"/>',
-  modeRepeat: '<path d="M6.5 11a5.5 5.5 0 0 1 9.2-4M17.5 13a5.5 5.5 0 0 1-9.2 4"/><path d="M14.2 4.4L16.2 7l-2.9.7M9.8 19.6L7.8 17l2.9-.7"/><text x="12" y="14.7" text-anchor="middle" font-size="7.5" class="ic-f" stroke="none">1</text>',
+  modeRepeat: '<path d="M17 2.5l3.5 3.5-3.5 3.5M3 11.5v-1a4 4 0 0 1 4-4h13.5M7 21.5l-3.5-3.5L7 14.5M21 12.5v1a4 4 0 0 1-4 4H7"/><path d="M11 10.5h1.5v4.5"/>',
   modeShuffle: '<path d="M4 7h3.4l9.2 10H20M4 17h3.4l3-3.4M14.2 8.6l2.4-2.6H20"/><path d="M17.6 4.2l2.8 2.8-2.8 2.8M17.6 14.2l2.8 2.8-2.8 2.8"/>',
-  heart: '<path d="M12 20s-7.5-4.8-9.3-9.1C1.4 7.6 3.6 4.5 6.8 4.5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.2 0 5.4 3.1 4.1 6.4C19.5 15.2 12 20 12 20z"/>',
-  heartFill: '<path d="M12 20s-7.5-4.8-9.3-9.1C1.4 7.6 3.6 4.5 6.8 4.5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.2 0 5.4 3.1 4.1 6.4C19.5 15.2 12 20 12 20z" class="ic-f"/>',
+  heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  heartFill: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" class="ic-f"/>',
   download: '<path d="M12 4v10M8 10.5l4 4 4-4M4 19h16"/>',
   queue: '<path d="M4 6h11M4 12h11M4 18h7"/><path d="M18.5 10.5v7M15.5 14.5h6"/>',
   more: '<path d="M12 5.5v0M12 12v0M12 18.5v0" class="ic-thick"/>',
@@ -161,19 +161,19 @@ const ICONS = {
   grid: '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>',
   list: '<path d="M4 6h11M4 12h11M4 18h11"/><path d="M18.5 10.5v7M15.5 14.5h6"/>',
   filter: '<path d="M4 5h16l-6 7v6l-4 2v-8z"/>',
-  search: '<circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.2-4.2"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m20.5 20.5-4.2-4.2"/>',
   dotsV: '<circle cx="12" cy="5" r="1.5" class="ic-f"/><circle cx="12" cy="12" r="1.5" class="ic-f"/><circle cx="12" cy="19" r="1.5" class="ic-f"/>',
   dotsH: '<circle cx="5" cy="12" r="1.5" class="ic-f"/><circle cx="12" cy="12" r="1.5" class="ic-f"/><circle cx="19" cy="12" r="1.5" class="ic-f"/>',
   multiSelect: '<path d="M8.5 3.5h9a3 3 0 0 1 3 3v9"/><rect x="3.5" y="8.5" width="12" height="12" rx="3"/><path d="M6.9 14.7l2.3 2.3 4-4.4"/>',
   sortV: '<path d="M7 20V7M7 7L4.6 9.6M7 7l2.4 2.6M17 4v13M17 17l-2.4-2.6M17 17l2.4-2.6"/>',
   listView: '<path d="M4 6.5h16M4 12h16M4 17.5h10"/>',
-  lock: '<path d="M7 11h10v9H7zM9 11V7a3 3 0 0 1 6 0v4"/>',
-  unlock: '<path d="M7 11h10v9H7zM9 11V7a3 3 0 0 1 6 0"/>',
+  lock: '<rect width="14" height="9" x="5" y="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  unlock: '<rect width="14" height="9" x="5" y="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.7-1.5"/>',
   trash: '<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/>',
   moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/>',
   comment: '<path d="M4 5h16v11H9l-4 3v-3H4z"/>',
   bot: '<rect x="5" y="8" width="14" height="10" rx="2.5"/><path d="M12 5v3M9 12v2M15 12v2"/>',
-  note: '<path d="M9 17V6l10-2v11"/><circle cx="7" cy="17" r="2.2"/><circle cx="17" cy="15" r="2.2"/>',
+  note: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
   chevUp: '<path d="M6 14l6-6 6 6"/>',
   chevDn: '<path d="M6 10l6 6 6-6"/>',
   retry: '<path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/>',
@@ -772,6 +772,7 @@ function applyRate() {
 
 /* ================= 工具 ================= */
 let toastTimer = null;
+const LYR_NET_HINT = '；排查：①电脑防火墙放行 8790/41230 端口（或临时关闭防火墙专用网络档）②路由器若开了「AP 隔离」需关闭 ③确认两端连同一 WiFi 且电脑同步服务已开启';
 function toast(msg) {
   const t = $('toast');
   t.textContent = msg;
@@ -878,7 +879,7 @@ async function startGuessFm() {
   const pool = guessPool().slice();
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
   if (guessPick) { const gi = pool.findIndex((s) => s && s.id === guessPick.id); if (gi > 0) { pool.unshift(pool.splice(gi, 1)[0]); } }
-  const wantFresh = PREF.fmFresh && KG.loggedIn();
+  const wantFresh = PREF.fmFresh > 0 && KG.loggedIn();
   // 本地池优先：立即开播（消除点击后等待个性化流的空档）；无本地池才等酷狗
   if (pool.length) {
     await playFrom(pool[0], pool.slice(0, 12));
@@ -940,6 +941,20 @@ function bindGuessFmSettings() {
   };
   bindSeg('setFmAuto', 'fmAuto');
   bindSeg('setFmFresh', 'fmFresh');
+  bindSeg('setAutoSrc', 'autoSrc');
+  bindSeg('setPlayMode', 'playMode');
+  // 设置行切换播放模式：即时写回 state.mode（bindSeg 只落 PREF）
+  document.querySelectorAll('#setPlayMode .seg-item').forEach((b) => b.addEventListener('click', () => {
+    state.mode = b.dataset.v;
+    if (state.mode === 'shuffle' && state.queue.length) rebuildShuffle();
+    const pm = $('ppMode'); if (pm) pm.innerHTML = icon(state.mode === 'shuffle' ? 'modeShuffle' : state.mode === 'repeat' ? 'modeRepeat' : 'modeOrder', 22);
+  }));
+  // 播放模式设置行：写回 state.mode 并恢复按钮态（mode 值与播放页按钮共用）
+  try {
+    const pm = PREF.playMode || 'order';
+    if (pm !== 'order') { state.mode = pm; if (pm === 'shuffle' && state.queue.length) rebuildShuffle(); }
+    document.querySelectorAll('#setPlayMode .seg-item').forEach((b) => b.classList.toggle('active', b.dataset.v === (PREF.playMode || 'order')));
+  } catch (e) {}
 }
 // 首页大卡封面拼贴（真实封面 2x2 小图，无数据回退线性音符）
 // diff 更新：URL 签名不变跳过重建；新图先载后显（淡入），杜绝刷新时的空白闪烁
@@ -1280,7 +1295,7 @@ function oplCard(pl, mine) {
   card.className = 'opl-card';
   const cov = document.createElement('img');
   cov.className = 'cov';
-  cov.src = pl.cover || PLACEHOLDER;
+  cov.src = pl.cover || ((pl.songs || []).find((x) => x && x.picUrl) || {}).picUrl || PLACEHOLDER;
   cov.onerror = () => { cov.src = PLACEHOLDER; };
   const info = document.createElement('div');
   info.style.flex = '1';
@@ -1891,7 +1906,7 @@ async function importRecPlaylist(src, pl) {
       title: s.name || '', artist: s.singername || '', album: s.album || '',
       duration: s.duration || 0, picUrl: s.pic || '', level: normQuality(PREF.onlineQ) || 'high'
     }));
-    const kept = cleanImportedSongs(mapped);
+    const kept = autoSrcOn() ? cleanImportedSongs(mapped) : mapped;
     const plObj = { id: 'kg:' + pl.id, name: pl.name || '酷狗歌单', source: 'kugou', cover: pl.pic || '', songs: kept };
     const dup = state.onlinePlaylists.findIndex((x) => x.id === plObj.id);
     if (dup >= 0) state.onlinePlaylists.splice(dup, 1);
@@ -1902,7 +1917,7 @@ async function importRecPlaylist(src, pl) {
   }
   const r = await importPlaylist('netease', pl.id);
   if (!r.ok) { toast(r.reason || '歌单导入失败'); return; }
-  r.pl.songs = cleanImportedSongs(r.pl.songs);
+  if (autoSrcOn()) r.pl.songs = cleanImportedSongs(r.pl.songs);
   const dup = state.onlinePlaylists.findIndex((x) => x.id === r.pl.id);
   if (dup >= 0) state.onlinePlaylists.splice(dup, 1);
   state.onlinePlaylists.unshift(r.pl);
@@ -1961,7 +1976,7 @@ function openOpl(pl, keepFilter) {
   setView('opldetail', { title: pl.name });
   state.plSort = '';
   const songs = pl.songs || [];
-  const heroCov = pl.cover || (songs[0] && songs[0].picUrl) || PLACEHOLDER;
+  const heroCov = pl.cover || ((songs || []).find((x) => x && x.picUrl) || {}).picUrl || PLACEHOLDER;
   $('topBar').style.setProperty('--hero-img', 'url("' + String(heroCov).replace(/"/g, '') + '")');
   const canFav = !pl.demo && pl.id !== 'n:daily';
   const orderLabel = () => (state.mode === 'shuffle' ? '随机' : '顺序');
@@ -1991,7 +2006,8 @@ function openOpl(pl, keepFilter) {
   });
   $('plHeroOrder').addEventListener('click', () => {
     state.mode = state.mode === 'shuffle' ? 'order' : 'shuffle';
-    LS.save('mode', state.mode);
+    PREF.playMode = state.mode; LS.save('playMode', state.mode); LS.save('mode', state.mode);
+    try { document.querySelectorAll('#setPlayMode .seg-item').forEach((b) => b.classList.toggle('active', b.dataset.v === state.mode)); } catch (e) {}
     if (state.mode === 'shuffle' && state.queue.length) rebuildShuffle();
     const pm = $('ppMode'); if (pm) pm.innerHTML = icon(state.mode === 'shuffle' ? 'modeShuffle' : state.mode === 'repeat' ? 'modeRepeat' : 'modeOrder', 22);
     $('plHeroOrder').innerHTML = orderHtml();
@@ -2126,6 +2142,7 @@ function backFromDetail() {
 }
 
 // 导入净化（对齐 PC「导入自动适配原版」）：剔除带非原版标记的歌；全滤空回退原列表
+function autoSrcOn() { return PREF.autoSrc === undefined ? true : !!PREF.autoSrc; }
 function cleanImportedSongs(songs) {
   const arr = (songs || []).filter(Boolean);
   const cleaned = arr.filter((s) => !isNonOrig(s));
@@ -2407,7 +2424,7 @@ async function importMyKgPlaylists() {
       const mapped = songs.map((s) => ({
         id: 'online:kugou:' + s.hash, online: true, source: 'kugou', ref: s.hash,
         title: s.name || '', artist: s.singername || '', album: s.album || '',
-        duration: s.duration || 0, picUrl: '', level: 'standard'
+        duration: s.duration || 0, picUrl: s.pic || '', level: 'standard'
       }));
       const kept = cleanImportedSongs(mapped);
       const pl = { id: 'kg:' + p.id, name: p.name || '酷狗歌单', source: 'kugou', cover: p.picUrl || '', songs: kept };
@@ -2560,7 +2577,7 @@ async function doImport(raw) {
     const r = await kugouResolveShare(parsed.url);
     if (!r.ok) { toast(r.reason || '分享解析失败'); return; }
     const kept = cleanImportedSongs(r.songs);
-    const pl = { id: 'k:share:' + Date.now(), name: r.name ? `${r.name}（${kept.length} 首）` : `酷狗分享歌单（${kept.length} 首）`, source: 'kugou', cover: '', songs: kept };
+    const pl = { id: 'k:share:' + Date.now(), name: r.name ? `${r.name}（${kept.length} 首）` : `酷狗分享歌单（${kept.length} 首）`, source: 'kugou', cover: r.cover || (kept.find((x) => x && x.picUrl) || {}).picUrl || '', songs: kept };
     state.onlinePlaylists.unshift(pl);
     saveOpls();
     closeImportOverlay();
@@ -3995,7 +4012,7 @@ function applySyncBundle(r) {
   for (const pl of r.onlinePlaylists) {
     pl.fav = true; // 同步来的歌单标记收藏，确保落库并在"我的歌单"显示
     const dup = state.onlinePlaylists.findIndex((x) => x.id === pl.id);
-    if (dup >= 0) state.onlinePlaylists[dup] = Object.assign({}, state.onlinePlaylists[dup], pl, { fav: true }); else state.onlinePlaylists.unshift(pl);
+    if (dup >= 0) { const __old = state.onlinePlaylists[dup]; state.onlinePlaylists[dup] = Object.assign({}, __old, pl, { fav: true, cover: pl.cover || __old.cover || '' }); } else state.onlinePlaylists.unshift(pl);
   }
   for (const f of r.favorites) {
     const ex = state.favorites.find((x) => x.id === f.id);
@@ -4085,7 +4102,9 @@ async function pairSync() {
     set('同步完成 ✓ 已绑定该电脑' + (res.token ? '（之后同 WiFi 自动同步）' : ''), 'ok');
     toast('局域网同步完成');
   } catch (e) {
-    set('连接失败：' + ((e && e.message) || e), 'err');
+    const msg = (e && e.message) || '';
+    const timedOut = /timeout|failed to connect/i.test(msg);
+    set('连接失败：' + msg + (timedOut ? LYR_NET_HINT : ''), 'err');
   } finally { if (btn) btn.disabled = false; }
 }
 /* ---- 自动静默同步（发现→按 identity 匹配已绑定→只带 token 头） ---- */

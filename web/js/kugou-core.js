@@ -283,11 +283,13 @@ async function collectAllSongs(globalCollectionId) {
       if (!s.hash || seen.has(s.hash)) continue;
       seen.add(s.hash);
       const covRaw = (s.trans_param && s.trans_param.union_cover) || s.album_pic || s.salbum_pic || '';
-      const _sg = s.singername || s.singer || '';
-      let _nm = String(s.songname || s.name || '').trim();
-      if (_sg && _nm.startsWith(_sg)) { const _st = _nm.slice(_sg.length).replace(/^[\s\-–—/、·&]+/, '').trim(); if (_st) _nm = _st; }
+      // 歌手取 singerinfo 数组（网关接口只回它，singername 常缺失）；name 是「歌手 - 歌名」拼接，剥前缀
+      const singerNames = Array.isArray(s.singerinfo) ? s.singerinfo.map((x) => x && x.name).filter(Boolean).join('、') : (s.singername || s.singer || s.author_name || '');
+      let _nm = String(s.songname || s.name || s.filename || '').trim();
+      if (singerNames && _nm.startsWith(singerNames + ' - ')) _nm = _nm.slice(singerNames.length + 3).trim();
+      else if (singerNames && _nm.startsWith(singerNames)) { const _st = _nm.slice(singerNames.length).replace(/^[\s\-–—/、·&]+/, '').trim(); if (_st) _nm = _st; }
       all.push({
-        hash: s.hash, name: _nm, singername: _sg,
+        hash: s.hash, name: _nm, singername: singerNames,
         album: s.album_name || '', duration: s.duration || 0,
         pic: String(covRaw).replace('{size}', '480')
       });

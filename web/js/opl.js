@@ -41,7 +41,7 @@ export async function kugouResolveShare(rawUrl) {
         duration: Math.round((s.duration || s.timelength || 0) / (s.duration ? 1 : 1000)),
         album: s.album || s.album_id || '', picUrl: s.picUrl || '', level: '128'
       }));
-      if (songs.length) return { ok: true, name: lz.data.name || '', songs };
+      if (songs.length) return { ok: true, name: lz.data.name || '', cover: lz.data.cover || '', songs };
     }
     return { ok: false, reason: '分享解析失败（网络异常或链接无效）' };
   } catch (e) {
@@ -94,7 +94,7 @@ export async function importPlaylist(source, ref) {
     ok: true,
     pl: {
       id: (source === 'netease' ? 'n' : 'k') + ':' + (source === 'netease' ? ref : (String(ref).match(/gcid_(\w+)/) || [null, ref])[1]),
-      name: d.name || '在线歌单', source, cover: d.cover || '', desc: d.desc || '', songs
+      name: d.name || '在线歌单', source, cover: d.cover || d.picUrl || (songs.find((s) => s && s.picUrl) || {}).picUrl || '', desc: d.desc || '', songs
     }
   };
 }
