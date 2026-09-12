@@ -82,7 +82,7 @@ state.recent = LS.load('recent', []);
 state.dlDone = LS.load('dl', []);
 state.recentPls = LS.load('recpls', []);
 // 默认值对齐桌面：在线音质 高品(320)；下载音质 无损；翻译歌词默认开；倍速 1.0
-const PREF = Object.assign({ onlineQ: 'high', dlQ: 'lossless', sources: { netease: true, kugou: true }, lyrTrans: true, resume: true, theme: 'auto', accent: 'blue', skin: 'default', bgMode: 'cover', bgPreset: 'dusk', bgData: '', rate: 1, ambOn: 1, ambStrength: 60, ambBlur: 46, pStyle: 'B', lyrWin: 0, lyrFs: 18, lyrOp: 100, lyrBg: 1, lyrC1: '#4deaff', lyrC2: '#ffffff', lyrLocked: 0, lyrSweep: 'soft', lyrFont: 'default', fmAuto: 1, fmFresh: 0, autoSrc: 1, playMode: 'order', nickname: '', avatar: '', heroCard: '', autoSync: 1 }, LS.load('prefs', {}));
+const PREF = Object.assign({ onlineQ: 'high', dlQ: 'lossless', sources: { netease: true, kugou: true }, lyrTrans: true, resume: true, theme: 'auto', accent: 'blue', skin: 'default', bgMode: 'cover', bgPreset: 'dusk', bgData: '', rate: 1, ambOn: 1, ambStrength: 60, ambBlur: 46, pStyle: 'B', lyrWin: 0, lyrFs: 18, lyrOp: 100, lyrBg: 1, lyrC1: '#4deaff', lyrC2: '#ffffff', lyrLocked: 0, lyrSweep: 'soft', lyrFont: 'default', fmAuto: 1, fmFresh: 0, autoSrc: 1, playMode: 'order', homeRec: 1, nickname: '', avatar: '', heroCard: '', autoSync: 1 }, LS.load('prefs', {}));
 try { document.documentElement.style.setProperty('--lyr-sung', PREF.lyrC1 || '#4deaff'); } catch (e) {}
 /* ---- 账号操作（数据按账号命名空间隔离；设置/外观为设备级不随账号） ---- */
 (function syncProfileFromAccount() { const a = curAccount(); if (a) { PREF.nickname = a.name || ''; PREF.avatar = a.avatar || ''; } })();
@@ -800,10 +800,14 @@ function isNonOrig(item) {
 /* ================= 视图切换 ================= */
 /* 首页子tab状态：recommend=推荐, library=乐库 */
 let homeTab = 'recommend';
+/* 首页推荐显隐（设置-常规「首页推荐」，PREF.homeRec）：隐藏时首页仅保留搜索，推荐接口全部不请求 */
+const homeRecOn = () => PREF.homeRec !== 0;
 function setHomeTab(tab) {
+  if (!homeRecOn()) tab = 'library'; // 用户隐藏推荐：首页不再展示推荐内容
   homeTab = tab;
-  document.querySelectorAll('.home-top-tab').forEach((b) => b.classList.toggle('active', b.dataset.htab === tab));
+  document.querySelectorAll('.home-top-tab').forEach((b) => { b.classList.toggle('hidden', !homeRecOn()); b.classList.toggle('active', b.dataset.htab === tab); });
   const hr = $('homeRecommend'); if (hr) hr.classList.toggle('hidden', tab !== 'recommend');
+  const rf = $('refresher'); if (rf) rf.classList.toggle('hidden', tab !== 'recommend'); // 下拉刷新仅推荐页有意义
   // 乐库已迁至歌单页曲库 tab；首页不再有乐库
 }
 // 歌单页 音乐/曲库 两 tab
@@ -943,6 +947,14 @@ function bindGuessFmSettings() {
   bindSeg('setFmFresh', 'fmFresh');
   bindSeg('setAutoSrc', 'autoSrc');
   bindSeg('setPlayMode', 'playMode');
+  bindSeg('setHomeRec', 'homeRec');
+  // 首页推荐显隐：切换后立即生效。重新打开时强制回推荐视图并无条件补载数据
+  // （此刻可能停在设置页或 homeTab 已被隐藏逻辑改写，不能沿用当前 homeTab）
+  document.querySelectorAll('#setHomeRec .seg-item').forEach((b) => b.addEventListener('click', () => {
+    if (homeRecOn()) { setHomeTab('recommend'); refreshHomeData(); }
+    else setHomeTab(homeTab);
+  }));
+  setHomeTab('recommend'); // 启动即按设置应用显隐
   // 设置行切换播放模式：即时写回 state.mode（bindSeg 只落 PREF）
   document.querySelectorAll('#setPlayMode .seg-item').forEach((b) => b.addEventListener('click', () => {
     state.mode = b.dataset.v;
@@ -1778,6 +1790,7 @@ function shuffleArr(a) {
   return a;
 }
 function renderHomeRecs() {
+  if (!homeRecOn()) return; // 隐藏推荐：跳过示例填充与网易云/酷狗推荐接口请求
   // 示例兜底先行；真实数据（网易云个性推荐/酷狗推荐歌单，均匿名可用）到达后替换
   const fill = (elId, pls) => {
     const el = $(elId);
@@ -1889,6 +1902,7 @@ function bindPullRefresh() {
   }, { passive: true });
 }
 async function refreshHomeData() {
+  if (!homeRecOn()) return; // 隐藏推荐：跳过推荐数据加载
   updateHomeCards(); // 猜你喜欢卡重抽
   renderHomeRecs();
   await loadDaily();
@@ -2528,6 +2542,7 @@ function openRecentPls() {
   setView('recentpls');
 }
 async function loadDaily() {
+  if (!homeRecOn()) return; // 隐藏推荐：不请求每日推荐
   if (!NE.loggedIn()) { renderDaily(); return; }
   const r = await NE.recommendSongs().catch(() => ({ ok: false }));
   if (r.ok && r.songs.length) {
