@@ -148,6 +148,26 @@ async function accountInfo() {
   };
 }
 
+// ---------- 每日推荐（游客态：明文公开端点，通用推荐）----------
+async function guestDaily() {
+  const url = 'https://music.163.com/api/v3/discovery/recommend/songs';
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Linux; Android 14) LyraAriaMobile', 'Cookie': 'NMTID=00O7', 'Referer': 'https://music.163.com/' };
+  let j = null;
+  try {
+    const N = nh();
+    if (N) { const r = await N.request({ url, method: 'POST', headers, readTimeout: 15000, trustAll: true }); j = JSON.parse(r.data); }
+    else { const res = await fetch(url, { method: 'POST', headers }); j = await res.json(); }
+  } catch { return { ok: false, songs: [] }; }
+  const list = (j.data && j.data.dailySongs) || [];
+  return {
+    ok: j.code === 200 && list.length > 0, code: j.code, guest: true,
+    songs: list.map((s) => ({
+      id: String(s.id), name: s.name, artist: (s.ar || []).map((a) => a.name).join(' / '),
+      album: s.al && s.al.name, picUrl: s.al && s.al.picUrl, duration: Math.round((s.dt || 0) / 1000),
+      reason: s.recommendReason || ''
+    }))
+  };
+}
 // ---------- 每日推荐（需登录）----------
 async function recommendSongs() {
   const r = await weapiPost('/api/v3/discovery/recommend/songs', {}, cookieFor());
@@ -235,4 +255,4 @@ async function subscribePlaylist(id) {
   return { ok: r.json && Number(r.json.code) === 200, code: r.json && r.json.code };
 }
 
-export { setState, getState, loggedIn, setScope, anonimous, qrCreate, qrCheck, accountInfo, recommendSongs, personalizedPlaylists, myPlaylists, playlistSongsAll, songUrl, logout, subscribePlaylist };
+export { setState, getState, loggedIn, setScope, anonimous, qrCreate, qrCheck, accountInfo, guestDaily, recommendSongs, personalizedPlaylists, myPlaylists, playlistSongsAll, songUrl, logout, subscribePlaylist };

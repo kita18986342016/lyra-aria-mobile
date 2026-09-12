@@ -82,7 +82,7 @@ state.recent = LS.load('recent', []);
 state.dlDone = LS.load('dl', []);
 state.recentPls = LS.load('recpls', []);
 // 默认值对齐桌面：在线音质 高品(320)；下载音质 无损；翻译歌词默认开；倍速 1.0
-const PREF = Object.assign({ onlineQ: 'high', dlQ: 'lossless', sources: { netease: true, kugou: true }, lyrTrans: true, resume: true, theme: 'auto', accent: 'blue', skin: 'default', bgMode: 'cover', bgPreset: 'dusk', bgData: '', rate: 1, ambOn: 1, ambStrength: 60, ambBlur: 46, pStyle: 'B', lyrWin: 0, lyrFs: 18, lyrOp: 100, lyrBg: 1, lyrC1: '#4deaff', lyrC2: '#ffffff', lyrLocked: 0, lyrSweep: 'soft', lyrFont: 'default', fmAuto: 1, fmFresh: 0, autoSrc: 1, playMode: 'order', homeRec: 1, nickname: '', avatar: '', heroCard: '', autoSync: 1 }, LS.load('prefs', {}));
+const PREF = Object.assign({ onlineQ: 'high', dlQ: 'lossless', sources: { netease: true, kugou: true }, lyrTrans: true, resume: true, theme: 'auto', accent: 'blue', skin: 'default', bgMode: 'cover', bgPreset: 'dusk', bgData: '', rate: 1, ambOn: 1, ambStrength: 60, ambBlur: 46, pStyle: 'B', lyrWin: 0, lyrFs: 18, lyrOp: 100, lyrBg: 1, lyrC1: '#4deaff', lyrC2: '#ffffff', lyrLocked: 0, lyrSweep: 'soft', lyrFont: 'default', fmAuto: 1, fmFresh: 0, autoSrc: 1, playMode: 'order', homeRec: 1, homeSec: { guess: 1, daily: 1, recent: 1, banner: 1, recPls: 1 }, nickname: '', avatar: '', heroCard: '', autoSync: 1 }, LS.load('prefs', {}));
 try { document.documentElement.style.setProperty('--lyr-sung', PREF.lyrC1 || '#4deaff'); } catch (e) {}
 /* ---- 账号操作（数据按账号命名空间隔离；设置/外观为设备级不随账号） ---- */
 (function syncProfileFromAccount() { const a = curAccount(); if (a) { PREF.nickname = a.name || ''; PREF.avatar = a.avatar || ''; } })();
@@ -91,7 +91,7 @@ reloadSourceAccounts();
 function flushCurAccountProfile() { const a = curAccount(); if (a) { a.name = PREF.nickname || ''; a.avatar = PREF.avatar || ''; saveAccList(accList().map((x) => x.id === a.id ? a : x)); } }
 function loadAccountData() { state.onlinePlaylists = LS.load('opls', []); state.mylists = LS.load('mylists', []); state.favorites = LS.load('favs', []); state.recent = LS.load('recent', []); state.recentPls = LS.load('recpls', []); }
 function saveAccountData() { saveOpls(); saveMylists(); LS.save('favs', state.favorites); LS.save('recent', state.recent); LS.save('recpls', state.recentPls); }
-function rerenderAll() { try { renderOpls(); renderMylists(); renderFavs(); renderRecent(); refreshStats(); renderHomeSections(); updateHomeCards(); applyMeProfile(); refreshAccountUI(); refreshBiliUI(); refreshKgUI(); } catch (e) { /* 忽略 */ } }
+function rerenderAll() { try { renderOpls(); renderMylists(); renderFavs(); renderRecent(); refreshStats(); renderHomeSections(); applyHomeSections(); updateHomeCards(); applyMeProfile(); refreshAccountUI(); refreshBiliUI(); refreshKgUI(); } catch (e) { /* 忽略 */ } }
 function switchAccount(id) {
   if (!id || id === CUR_ACC) return;
   flushCurAccountProfile(); saveAccountData();
@@ -837,6 +837,27 @@ function guessPool() {
   state.favorites.forEach((f) => { if (!seen.has(f.id)) pool.push(f); });
   return pool;
 }
+// 常听歌手 top3 → 各搜 6 首热歌并入熟歌池（对齐 PC 猜你喜欢数据源；搜索失败静默跳过）
+async function expandPoolByArtists(pool) {
+  const freq = new Map();
+  const addFreq = (x) => { if (x && x.artist) String(x.artist).split(/[、,\/]/).forEach((a) => { const n = a.trim(); if (n && n.length <= 30) freq.set(n, (freq.get(n) || 0) + 1); }); };
+  (state.favorites || []).forEach(addFreq);
+  resolveRecent().forEach(addFreq);
+  const top = [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n]) => n);
+  const seen = new Set(pool.map((x) => x.id));
+  for (const ar of top) {
+    try {
+      const r = await leizSearch('netease', ar);
+      if (!r || !r.ok || !Array.isArray(r.data)) continue;
+      r.data.slice(0, 6).forEach((it) => {
+        if (!it || !it.id) return;
+        const sg = { id: 'online:netease:' + it.id, online: true, source: 'netease', ref: String(it.id), title: it.name || '', artist: it.artists || '', album: it.album || '', duration: it.duration || 0, picUrl: it.picUrl || '', level: 'standard' };
+        if (!seen.has(sg.id)) { seen.add(sg.id); pool.push(sg); }
+      });
+    } catch { /* 静默 */ }
+  }
+  return pool;
+}
 
 /* ================= 猜你喜欢 FM（点名片开播，播完自动续猜；尝新=酷狗个性化流，默认本地池） ================= */
 const FM = { active: false, mode: 'local' };
@@ -883,28 +904,42 @@ async function startGuessFm() {
   const pool = guessPool().slice();
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
   if (guessPick) { const gi = pool.findIndex((s) => s && s.id === guessPick.id); if (gi > 0) { pool.unshift(pool.splice(gi, 1)[0]); } }
-  const wantFresh = PREF.fmFresh > 0 && KG.loggedIn();
+  const freshRatio = PREF.fmFresh > 0 ? Math.min(0.5, Number(PREF.fmFresh) || 0.3) : 0;
+  const wantFresh = freshRatio > 0; // 游客尝新源=网易通用每日推荐（无需登录）；酷狗个性化流登录后可用
+  const fetchFresh = async () => {
+    if (KG.loggedIn()) { const r = await KG.guessYouLike().catch(() => ({ ok: false })); if (r.ok && r.songs.length) return r.songs.map(kgSongOf); }
+    const g = await NE.guestDaily().catch(() => ({ ok: false, songs: [] }));
+    if (g.ok) return g.songs.map((x) => ({ id: 'online:netease:' + x.id, online: true, source: 'netease', ref: x.id, title: x.name || '', artist: x.artist || '', album: x.album || '', duration: x.duration || 0, picUrl: x.picUrl || '', level: 'standard', reason: x.reason || '' }));
+    return [];
+  };
   // 本地池优先：立即开播（消除点击后等待个性化流的空档）；无本地池才等酷狗
   if (pool.length) {
     await playFrom(pool[0], pool.slice(0, 12));
     FM.active = true; FM.mode = 'local';
     showPlayerPage();
     if (wantFresh) {
-      KG.guessYouLike().then((r) => {
-        if (r && r.ok && r.songs.length) {
+      // 后台扩池+按比例混合：nNew = 队列规模×ratio（首曲固定，其余洗牌）
+      (async () => {
+        try {
+          const grown = await expandPoolByArtists(pool.slice());
+          const fresh = await fetchFresh();
           const seen = new Set([pool[0].id]);
-          const add = r.songs.map(kgSongOf).filter((s) => !seen.has(s.id));
-          if (add.length) { state.queue = [pool[0], ...add]; state.queueIndex = 0; if (typeof rebuildShuffle === 'function') rebuildShuffle(); updateQueueUI(); FM.mode = 'kugou'; }
-        }
-      }).catch(() => {});
-    }
+          const fam = grown.filter((x) => !seen.has(x.id));
+          for (let i = fam.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [fam[i], fam[j]] = [fam[j], fam[i]]; }
+          const fr = fresh.filter((x) => !seen.has(x.id));
+          for (let i = fr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [fr[i], fr[j]] = [fr[j], fr[i]]; }
+          const total = Math.max(12, Math.min(50, fam.length + fr.length));
+          const nNew = Math.round(total * freshRatio);
+          const mix = [pool[0], ...fr.slice(0, nNew), ...fam.slice(0, total - 1 - nNew)];
+          if (mix.length > 1) { state.queue = mix; state.queueIndex = 0; if (typeof rebuildShuffle === 'function') rebuildShuffle(); updateQueueUI(); FM.mode = 'mixed'; }
+        } catch { /* 保持本地池 */ }
+      })();
+    } else { expandPoolByArtists(pool).then((grown) => { if (grown.length > 12) { const rest = grown.slice(1).filter((x) => x.id !== pool[0].id); for (let i = rest.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [rest[i], rest[j]] = [rest[j], rest[i]]; } state.queue = [pool[0], ...rest.slice(0, 49)]; state.queueIndex = 0; if (typeof rebuildShuffle === 'function') rebuildShuffle(); updateQueueUI(); } }); }
     return;
   }
   let queue = [];
-  if (wantFresh) {
-    const r = await KG.guessYouLike().catch(() => ({ ok: false }));
-    if (r.ok && r.songs.length) queue = r.songs.map(kgSongOf);
-  }
+  if (wantFresh) queue = await fetchFresh();
+  if (!queue.length) queue = await expandPoolByArtists(guessPool());
   if (!queue.length) { toast('暂无推荐 — 先听几首或收藏歌曲'); return; }
   await playFrom(queue[0], queue);
   FM.active = true;
@@ -946,6 +981,14 @@ function bindGuessFmSettings() {
   bindSeg('setFmAuto', 'fmAuto');
   bindSeg('setFmFresh', 'fmFresh');
   bindSeg('setAutoSrc', 'autoSrc');
+  // 首页区块开关（多选，至少保留一个）
+  document.querySelectorAll('#setHomeSec .seg-item').forEach((b) => b.addEventListener('click', () => {
+    const k = b.dataset.v; if (!k) return;
+    const v = Object.assign({ guess: 1, daily: 1, recent: 1, banner: 1, recPls: 1 }, PREF.homeSec || {});
+    const onCount = Object.values(v).filter(Boolean).length;
+    if (v[k] && onCount <= 1) { toast('至少保留一个首页区块'); return; }
+    v[k] = v[k] ? 0 : 1; PREF.homeSec = v; savePrefs(); applyHomeSections();
+  }));
   bindSeg('setPlayMode', 'playMode');
   bindSeg('setHomeRec', 'homeRec');
   // 首页推荐显隐：切换后立即生效。重新打开时强制回推荐视图并无条件补载数据
@@ -1002,6 +1045,21 @@ function cardCovers(cardId, songs) {
     img.onerror = () => img.remove();
     img.src = s.picUrl;
   });
+}
+// 首页区块可见性（组件化）：至少保留一个
+function applyHomeSections() {
+  const v = Object.assign({ guess: 1, daily: 1, recent: 1, banner: 1, recPls: 1 }, PREF.homeSec || {});
+  const map = { guess: 'cardGuess', daily: 'cardDaily', recent: 'cardRecent', banner: 'btnBannerEnter', recPls: ['recNetease', 'recKugou', 'homeSourceTabs'] };
+  const onCount = Object.values(v).filter(Boolean).length;
+  Object.keys(map).forEach((k) => {
+    const ids = Array.isArray(map[k]) ? map[k] : [map[k]];
+    ids.forEach((id) => { const el = document.getElementById(id); if (el) el.style.display = v[k] ? '' : 'none'; });
+  });
+  // 源胶囊行（home-source-tabs 若无 id 用 class 找）
+  const tabs = document.querySelector('.home-source-tabs'); if (tabs) tabs.style.display = v.recPls ? '' : 'none';
+  // 三列大卡容器：全关时整行隐藏（避免空行）
+  const bigRow = document.querySelector('.home-big-cards'); if (bigRow) bigRow.style.display = (v.guess || v.daily || v.recent) ? '' : 'none';
+  document.querySelectorAll('#setHomeSec .seg-item').forEach((b) => b.classList.toggle('active', !!v[b.dataset.v]));
 }
 function updateHomeCards() {
   // 猜你喜欢：FM 进行中显示当前曲；否则最近播放+收藏 混合池随机一首
@@ -2470,7 +2528,7 @@ async function importMyPlaylists() {
       const songs = r.songs.map((s) => ({
         id: 'online:netease:' + s.id, online: true, source: 'netease', ref: s.id,
         title: s.name || '', artist: s.artist || '', album: s.album || '',
-        duration: s.duration || 0, picUrl: s.picUrl || '', level: 'standard'
+        duration: s.duration || 0, picUrl: s.picUrl || '', level: 'standard', reason: s.reason || ''
       }));
       const kept = cleanImportedSongs(songs);
       const pl = { id: 'n:' + p.id, name: p.name || '网易云歌单', source: 'netease', cover: p.picUrl || '', songs: kept };
@@ -2487,17 +2545,18 @@ async function importMyPlaylists() {
 
 // 每日推荐（登录后真实数据）：顶部卡片进入"每日推荐"歌单页
 let dailySongs = [];
+let dailyGuest = false;
 function dailyPlaylist() {
   return { id: 'n:daily', name: '每日推荐', source: 'netease', cover: (dailySongs[0] || {}).picUrl || '', songs: dailySongs.slice(0, 30) };
 }
 function openDailyPlaylist() {
-  if (!NE.loggedIn()) { toast('登录网易云账号后解锁每日推荐'); return; }
+  // 游客态也可用（通用推荐；登录后自动切个性化）
   if (!dailySongs.length) { toast('每日推荐获取中，稍后再试'); loadDaily(); return; }
   openOpl(dailyPlaylist());
 }
 function renderDaily() {
   const sub = $('cardDailySub');
-  if (sub) sub.textContent = NE.loggedIn() && dailySongs.length ? `为你精选 ${dailySongs.length} 首` : '登录后解锁个性化';
+  if (sub) sub.textContent = dailySongs.length ? (NE.loggedIn() ? `为你精选 ${dailySongs.length} 首` : `通用推荐 ${dailySongs.length} 首 · 登录解锁个性化`) : '获取中…';
   cardCovers('cardDaily', dailySongs.slice(0, 4));
 }
 // 最近听过：最近打开过的歌单列表（上限 10，含每日推荐/网易云/酷狗推荐歌单）
@@ -2543,7 +2602,17 @@ function openRecentPls() {
 }
 async function loadDaily() {
   if (!homeRecOn()) return; // 隐藏推荐：不请求每日推荐
-  if (!NE.loggedIn()) { renderDaily(); return; }
+  if (!NE.loggedIn()) {
+    // 游客态：明文端点通用每日推荐（登录后走个性化链路）
+    const g = await NE.guestDaily().catch(() => ({ ok: false, songs: [] }));
+    dailySongs = g.ok ? g.songs.map((x) => ({
+      id: 'online:netease:' + x.id, online: true, source: 'netease', ref: x.id,
+      title: x.name || '', artist: x.artist || '', album: x.album || '',
+      duration: x.duration || 0, picUrl: x.picUrl || '', level: 'standard', reason: x.reason || ''
+    })) : [];
+    dailyGuest = g.ok;
+    renderDaily(); return;
+  }
   const r = await NE.recommendSongs().catch(() => ({ ok: false }));
   if (r.ok && r.songs.length) {
     dailySongs = r.songs.map((s) => ({
