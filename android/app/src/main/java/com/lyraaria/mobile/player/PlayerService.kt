@@ -332,13 +332,13 @@ class PlayerService : MediaSessionService() {
             val p = PlayerHolder.player
             if (p == null) {
                 // 服务未就绪：入队等待（防连续调用覆盖）
-                PlayerHolder.pendingQueue.add { loadAndPlay(context, url, title, artist, duration, onReady) }
+                PlayerHolder.pendingQueue.add { loadAndPlay(context, url, title, artist, duration, "", onReady) }
                 return
             }
             main.post {
                 // 竞态守卫：等待期间播放器已被释放/重建则重新入队
                 if (p !== PlayerHolder.player) {
-                    PlayerHolder.pendingQueue.add { loadAndPlay(context, url, title, artist, duration, onReady) }
+                    PlayerHolder.pendingQueue.add { loadAndPlay(context, url, title, artist, duration, "", onReady) }
                     return@post
                 }
                 // B站 CDN 校验 Referer：bilivideo 系域名动态下发，其他音源清空（防外链 Referer 被拒）
