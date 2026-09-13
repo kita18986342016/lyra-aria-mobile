@@ -82,7 +82,16 @@ class PlayerService : MediaSessionService() {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 when (playbackState) {
                     Player.STATE_READY -> PlayerHolder.notifyState("loaded")
-                    Player.STATE_ENDED -> PlayerHolder.notifyState("ended")
+                    Player.STATE_ENDED -> {
+                        // 原生交接：有预解析好的下一首则直接续播（后台/锁屏 WebView 冻结也能推进）
+                        val nxt = PlayerHolder.handoff
+                        PlayerHolder.handoff = null
+                        PlayerHolder.notifyState("ended")
+                        nxt?.let {
+                            PlayerHolder.notifyMedia("native-advanced:" + it.songId)
+                            loadAndPlay(this@PlayerService, it.url, it.title, it.artist, it.duration)
+                        }
+                    }
                 }
             }
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -102,8 +111,15 @@ class PlayerService : MediaSessionService() {
                 PlayerHolder.notifyError(error.errorCodeName + ": " + error.message)
             }
         })
+        // 通知点击 → 回到应用主界面（缺失时点通知无反应，用户报障）
+        val launchIntent: android.content.Intent? = packageManager.getLaunchIntentForPackage(packageName)
+        val sessionPi = launchIntent?.let {
+            android.app.PendingIntent.getActivity(this, 0, it,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
+        }
         mediaSession = MediaSession.Builder(this, p)
             // 通知栏/线控 上一首·下一首 → 转发 Web 层（单曲模型下 Media3 默认无队列可跳）
+            .setSessionActivity(sessionPi!!)
             .setCallback(object : MediaSession.Callback {
                 // 拦截标准切歌命令并转发 Web 层执行真正的队列导航
                 override fun onPlayerCommandRequest(

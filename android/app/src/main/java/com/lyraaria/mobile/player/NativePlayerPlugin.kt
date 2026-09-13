@@ -127,6 +127,27 @@ class NativePlayerPlugin : Plugin() {
         call.resolve()
     }
 
+
+    @PluginMethod
+    fun setNextTrack(call: PluginCall) {
+        val url = (call.getString("url") ?: "").trim()
+        val songId = call.getString("songId") ?: ""
+        if (url.isEmpty() || songId.isEmpty()) return call.reject("url/songId 缺失")
+        PlayerHolder.handoff = PlayerHolder.PendingTrack(
+            url,
+            call.getString("title") ?: "",
+            call.getString("artist") ?: "",
+            call.getFloat("duration", 0f) ?: 0f,
+            songId
+        )
+        call.resolve()
+    }
+
+    @PluginMethod
+    fun clearNextTrack(call: PluginCall) {
+        PlayerHolder.handoff = null
+        call.resolve()
+    }
     @PluginMethod
     fun stop(call: PluginCall) {
         PlayerService.onMain {

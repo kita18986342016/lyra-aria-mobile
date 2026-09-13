@@ -695,10 +695,18 @@ function onPlayerState(e) {
     state.playing = false; updatePlayBtn();
     if (PREF.resume !== false && state.current) saveResumeState(state.current, state.position);
   } else if (e.state === 'ended') {
-    // 去重：重复 ended（双触发/后台恢复重放）会让 playNext 连跑两次→跳歌（1.4.1 用户报障）
-    const _now = Date.now();
-    if (_now - (window._lastEndedAt || 0) < 1500) { window._lastEndedAt = _now; return; }
-    window._lastEndedAt = _now;
+    // 原生交接已续播：只推进 UI 指针，不重复调播放 API
+    if (handoffNextId && state.queue.length) {
+      const ni = state.queue.findIndex((x) => x.id === handoffNextId);
+      handoffNextId = null;
+      if (ni >= 0) {
+        state.queueIndex = ni; state.current = state.queue[ni];
+        updatePlayerBar(); updateQueueUI(); addHistory(state.queue[ni]);
+        armNativeNext(); // 预解析再下一首
+        window._lastEndedAt = Date.now();
+        return;
+      }
+    }
     state.playing = false; updatePlayBtn();
     if (PREF.resume !== false && state.current) saveResumeState(state.current, 0); // 播完归零
     if (state.mode === 'repeat') { playerSeek(0); playerPlay(); }
@@ -2844,6 +2852,26 @@ function prewarmNext() {
   } catch { /* 预热失败静默 */ }
 }
 
+// —— 原生交接：预解析下一首交给原生层，后台/锁屏由原生续播（WebView 冻结不阻断）——
+let handoffNextId = null;
+async function armNativeNext() {
+  const NP = window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins.NativePlayer : null;
+  if (!NP || !NP.setNextTrack) return;
+  try {
+    if (!state.queue.length) return;
+    const ci = state.queueIndex >= 0 ? state.queueIndex : 0;
+    const nx = state.queue[(ci + 1) % state.queue.length];
+    if (!nx) return;
+    if (handoffNextId === nx.id) return; // 已就绪
+    const r = await resolvePlayable(nx);
+    if (!r || !r.url) return;
+    handoffNextId = nx.id;
+    const ps = r.song || nx;
+    await NP.setNextTrack({ url: r.url, title: ps.title || '', artist: ps.artist || '', duration: ps.duration || 0, songId: nx.id });
+  } catch { /* 静默：失败退化到 JS 推进 */ }
+}
+function invalidateNativeNext() { handoffNextId = null; try { const NP = window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins.NativePlayer : null; if (NP && NP.clearNextTrack) NP.clearNextTrack().catch(() => {}); } catch (e) {} }
+
 async function resolvePlayable(song) {
   // 预热命中：直接用缓存的解析结果（用后即弃，避免 URL 过期）
   const pc = prewarmCache.get(song.id);
@@ -2906,25 +2934,8 @@ async function startSong(song, seekTo = 0) {
     const cur = state.queue[state.queueIndex];
     if (state.queueIndex < 0 || !cur || cur.id !== reqId) return false;
     const { song: playSong, url } = resolved;
-    if (resolved && resolved.timeout) {
-      toast('播放地址获取超时，请检查网络后重试');
-      rollbackFailed(prevIndex);
-      // 超时多为后台冻结所致——恢复后自动推进（限 2 次），避免卡死不播
-      window._resolveFailStreak = (window._resolveFailStreak || 0) + 1;
-      if (window._resolveFailStreak <= 2 && state.queue.length > 1) setTimeout(() => { window._resolveFailStreak = 0; playNext(); }, 1200);
-      else window._resolveFailStreak = 0;
-      return false;
-    }
-    if (!url || !playSong) {
-      toast('无法获取播放地址，请稍后重试');
-      rollbackFailed(prevIndex);
-      // 后台/弱网解析失败会静默停住（用户报障）——自动推进但限 2 次，防连环跳歌
-      window._resolveFailStreak = (window._resolveFailStreak || 0) + 1;
-      if (window._resolveFailStreak <= 2 && state.queue.length > 1) setTimeout(() => { window._resolveFailStreak = 0; playNext(); }, 1200);
-      else window._resolveFailStreak = 0;
-      return false;
-    }
-    window._resolveFailStreak = 0; // 成功即清零
+    if (resolved && resolved.timeout) { toast('播放地址获取超时，请检查网络后重试'); return rollbackFailed(prevIndex); }
+    if (!url || !playSong) { toast('无法获取播放地址，请稍后重试'); return rollbackFailed(prevIndex); }
     if (playSong.id !== song.id) {
       toast('已按严格匹配切换音源：' + (SRC_NAMES[playSong.source] || playSong.source));
       // 队列内同步替换（保持 UI 一致）
@@ -2934,6 +2945,7 @@ async function startSong(song, seekTo = 0) {
     updatePlayerBar();
     updateQueueUI();
     LS.save('last', lastSnapshot(playSong));
+    armNativeNext(); // 预解析下一首交给原生
     await playerLoad(playSong, url);
     if (seekTo > 0) await playerSeek(seekTo);
     await playerPlay();

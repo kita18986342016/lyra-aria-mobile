@@ -17,6 +17,11 @@ object PlayerHolder {
     /** 服务启动窗口内积压的播放请求（并发安全队列，防单槽覆盖竞态） */
     val pendingQueue = ConcurrentLinkedQueue<() -> Unit>()
 
+    /** 原生交接队列：JS 预解析好的下一首（ENDED 时原生直接续播，WebView 冻结不阻断） */
+    data class PendingTrack(val url: String, val title: String, val artist: String, val duration: Float, val songId: String)
+    @Volatile
+    var handoff: PendingTrack? = null
+
     /** 插件注册的状态监听 */
     @Volatile
     var listener: ((state: String, position: Float, duration: Float, message: String?) -> Unit)? = null
