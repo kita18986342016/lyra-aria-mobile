@@ -695,6 +695,10 @@ function onPlayerState(e) {
     state.playing = false; updatePlayBtn();
     if (PREF.resume !== false && state.current) saveResumeState(state.current, state.position);
   } else if (e.state === 'ended') {
+    // 去重：重复 ended（双触发/后台恢复重放）会让 playNext 连跑两次→跳歌（1.4.1 用户报障）
+    const _now = Date.now();
+    if (_now - (window._lastEndedAt || 0) < 1500) { window._lastEndedAt = _now; return; }
+    window._lastEndedAt = _now;
     state.playing = false; updatePlayBtn();
     if (PREF.resume !== false && state.current) saveResumeState(state.current, 0); // 播完归零
     if (state.mode === 'repeat') { playerSeek(0); playerPlay(); }
@@ -2902,8 +2906,25 @@ async function startSong(song, seekTo = 0) {
     const cur = state.queue[state.queueIndex];
     if (state.queueIndex < 0 || !cur || cur.id !== reqId) return false;
     const { song: playSong, url } = resolved;
-    if (resolved && resolved.timeout) { toast('播放地址获取超时，请检查网络后重试'); return rollbackFailed(prevIndex); }
-    if (!url || !playSong) { toast('无法获取播放地址，请稍后重试'); return rollbackFailed(prevIndex); }
+    if (resolved && resolved.timeout) {
+      toast('播放地址获取超时，请检查网络后重试');
+      rollbackFailed(prevIndex);
+      // 超时多为后台冻结所致——恢复后自动推进（限 2 次），避免卡死不播
+      window._resolveFailStreak = (window._resolveFailStreak || 0) + 1;
+      if (window._resolveFailStreak <= 2 && state.queue.length > 1) setTimeout(() => { window._resolveFailStreak = 0; playNext(); }, 1200);
+      else window._resolveFailStreak = 0;
+      return false;
+    }
+    if (!url || !playSong) {
+      toast('无法获取播放地址，请稍后重试');
+      rollbackFailed(prevIndex);
+      // 后台/弱网解析失败会静默停住（用户报障）——自动推进但限 2 次，防连环跳歌
+      window._resolveFailStreak = (window._resolveFailStreak || 0) + 1;
+      if (window._resolveFailStreak <= 2 && state.queue.length > 1) setTimeout(() => { window._resolveFailStreak = 0; playNext(); }, 1200);
+      else window._resolveFailStreak = 0;
+      return false;
+    }
+    window._resolveFailStreak = 0; // 成功即清零
     if (playSong.id !== song.id) {
       toast('已按严格匹配切换音源：' + (SRC_NAMES[playSong.source] || playSong.source));
       // 队列内同步替换（保持 UI 一致）

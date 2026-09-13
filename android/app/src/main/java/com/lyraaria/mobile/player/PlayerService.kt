@@ -74,7 +74,8 @@ class PlayerService : MediaSessionService() {
         // 通知栏歌词接管：Media3 默认 Provider 仅 title/artist，换自定义 Provider
         try { setMediaNotificationProvider(LyricNotificationProvider(this)) } catch (_: Exception) {}
         val p = ExoPlayer.Builder(this)
-            .setMediaSourceFactory(androidx.media3.exoplayer.source.DefaultMediaSourceFactory(httpFactory))
+            // DefaultDataSource 包装：HTTP 走 httpFactory（含 B站 Referer 注入），content:///file 走系统源（曲库本地歌必须）——此前只用 httpFactory 导致曲库歌全部无法播放
+            .setMediaSourceFactory(androidx.media3.exoplayer.source.DefaultMediaSourceFactory(androidx.media3.datasource.DefaultDataSource.Factory(this, httpFactory)))
             .build()
         player = p
         p.addListener(object : Player.Listener {
