@@ -863,7 +863,7 @@ async function expandPoolByArtists(pool) {
       if (!r || !r.ok || !Array.isArray(r.data)) continue;
       r.data.slice(0, 6).forEach((it) => {
         if (!it || !it.id) return;
-        const sg = { id: 'online:netease:' + it.id, online: true, source: 'netease', ref: String(it.id), title: it.name || '', artist: it.artists || '', album: it.album || '', duration: it.duration || 0, picUrl: it.picUrl || '', level: 'standard' };
+        const sg = { id: 'online:netease:' + it.id, online: true, source: 'netease', ref: String(it.id), title: it.name || '', artist: it.artists || '', album: it.album || '', duration: it.duration || 0, picUrl: it.picUrl || '' };
         if (!seen.has(sg.id)) { seen.add(sg.id); pool.push(sg); }
       });
     } catch { /* 静默 */ }
@@ -921,7 +921,7 @@ async function startGuessFm() {
   const fetchFresh = async () => {
     if (KG.loggedIn()) { const r = await KG.guessYouLike().catch(() => ({ ok: false })); if (r.ok && r.songs.length) return r.songs.map(kgSongOf); }
     const g = await NE.guestDaily().catch(() => ({ ok: false, songs: [] }));
-    if (g.ok) return g.songs.map((x) => ({ id: 'online:netease:' + x.id, online: true, source: 'netease', ref: x.id, title: x.name || '', artist: x.artist || '', album: x.album || '', duration: x.duration || 0, picUrl: x.picUrl || '', level: 'standard', reason: x.reason || '' }));
+    if (g.ok) return g.songs.map((x) => ({ id: 'online:netease:' + x.id, online: true, source: 'netease', ref: x.id, title: x.name || '', artist: x.artist || '', album: x.album || '', duration: x.duration || 0, picUrl: x.picUrl || '', reason: x.reason || '' }));
     return [];
   };
   // 本地池优先：立即开播（消除点击后等待个性化流的空档）；无本地池才等酷狗
@@ -2442,7 +2442,7 @@ async function importMyBiliFavs() {
       const songs = fr.data.songs.map((x) => ({
         id: 'online:bilibili:' + x.ref, online: true, source: 'bilibili', ref: x.ref,
         title: x.title || '', artist: x.artist || '', album: '', duration: x.duration || 0,
-        picUrl: x.picUrl || '', level: 'standard'
+        picUrl: x.picUrl || ''
       }));
       const kept = cleanImportedSongs(songs);
       const pl = { id: 'b:' + f.id, name: f.name ? `${f.name}（${kept.length} 首）` : `B站收藏夹（${kept.length} 首）`, source: 'bilibili', cover: fr.data.cover || '', songs: kept };
@@ -2519,7 +2519,7 @@ async function importMyKgPlaylists() {
       const mapped = songs.map((s) => ({
         id: 'online:kugou:' + s.hash, online: true, source: 'kugou', ref: s.hash,
         title: s.name || '', artist: s.singername || '', album: s.album || '',
-        duration: s.duration || 0, picUrl: s.pic || '', level: 'standard'
+        duration: s.duration || 0, picUrl: s.pic || ''
       }));
       const kept = cleanImportedSongs(mapped);
       const pl = { id: 'kg:' + p.id, name: p.name || '酷狗歌单', source: 'kugou', cover: p.picUrl || '', songs: kept };
@@ -2551,7 +2551,7 @@ async function importMyPlaylists() {
       const songs = r.songs.map((s) => ({
         id: 'online:netease:' + s.id, online: true, source: 'netease', ref: s.id,
         title: s.name || '', artist: s.artist || '', album: s.album || '',
-        duration: s.duration || 0, picUrl: s.picUrl || '', level: 'standard', reason: s.reason || ''
+        duration: s.duration || 0, picUrl: s.picUrl || '', reason: s.reason || ''
       }));
       const kept = cleanImportedSongs(songs);
       const pl = { id: 'n:' + p.id, name: p.name || '网易云歌单', source: 'netease', cover: p.picUrl || '', songs: kept };
@@ -2631,7 +2631,7 @@ async function loadDaily() {
     dailySongs = g.ok ? g.songs.map((x) => ({
       id: 'online:netease:' + x.id, online: true, source: 'netease', ref: x.id,
       title: x.name || '', artist: x.artist || '', album: x.album || '',
-      duration: x.duration || 0, picUrl: x.picUrl || '', level: 'standard', reason: x.reason || ''
+      duration: x.duration || 0, picUrl: x.picUrl || '', reason: x.reason || ''
     })) : [];
     dailyGuest = g.ok;
     renderDaily(); return;
@@ -2641,7 +2641,7 @@ async function loadDaily() {
     dailySongs = r.songs.map((s) => ({
       id: 'online:netease:' + s.id, online: true, source: 'netease', ref: s.id,
       title: s.name || '', artist: s.artist || '', album: s.album || '',
-      duration: s.duration || 0, picUrl: s.picUrl || '', level: 'standard'
+      duration: s.duration || 0, picUrl: s.picUrl || ''
     }));
   } else dailySongs = [];
   renderDaily();
@@ -2662,7 +2662,7 @@ async function doImport(raw) {
     const songs = r.data.songs.map((x) => ({
       id: 'online:bilibili:' + x.ref, online: true, source: 'bilibili', ref: x.ref,
       title: x.title || '', artist: x.artist || '', album: '', duration: x.duration || 0,
-      picUrl: x.picUrl || '', level: 'standard'
+      picUrl: x.picUrl || ''
     }));
     const kept = cleanImportedSongs(songs);
     const pl = { id: 'b:' + fid, name: r.data.name ? `${r.data.name}（${kept.length} 首）` : `B站收藏夹（${kept.length} 首）`, source: 'bilibili', cover: r.data.cover || '', songs: kept };
