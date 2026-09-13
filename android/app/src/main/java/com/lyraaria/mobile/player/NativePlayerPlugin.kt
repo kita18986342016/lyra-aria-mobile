@@ -132,23 +132,27 @@ class NativePlayerPlugin : Plugin() {
 
 
     @PluginMethod
-    fun setNextTrack(call: PluginCall) {
-        val url = (call.getString("url") ?: "").trim()
-        val songId = call.getString("songId") ?: ""
-        if (url.isEmpty() || songId.isEmpty()) return call.reject("url/songId 缺失")
-        PlayerHolder.handoff = PlayerHolder.PendingTrack(
-            url,
-            call.getString("title") ?: "",
-            call.getString("artist") ?: "",
-            call.getFloat("duration", 0f) ?: 0f,
-            songId
-        )
+    fun setNextTracks(call: PluginCall) {
+        val arr = call.getArray("tracks") ?: return call.reject("tracks 缺失")
+        for (i in 0 until arr.length()) {
+            val t = arr.optJSONObject(i) ?: continue
+            val url = (t.optString("url") ?: "").trim()
+            val songId = (t.optString("songId") ?: "").trim()
+            if (url.isEmpty() || songId.isEmpty()) continue
+            PlayerHolder.handoffQueue.add(PlayerHolder.PendingTrack(
+                url,
+                t.optString("title", ""),
+                t.optString("artist", ""),
+                t.optDouble("duration", 0.0).toFloat(),
+                songId
+            ))
+        }
         call.resolve()
     }
 
     @PluginMethod
-    fun clearNextTrack(call: PluginCall) {
-        PlayerHolder.handoff = null
+    fun clearNextTracks(call: PluginCall) {
+        PlayerHolder.handoffQueue.clear()
         call.resolve()
     }
     @PluginMethod

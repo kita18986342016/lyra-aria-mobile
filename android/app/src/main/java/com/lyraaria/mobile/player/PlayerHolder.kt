@@ -23,8 +23,7 @@ object PlayerHolder {
 
     /** 原生交接队列：JS 预解析好的下一首（ENDED 时原生直接续播，WebView 冻结不阻断） */
     data class PendingTrack(val url: String, val title: String, val artist: String, val duration: Float, val songId: String)
-    @Volatile
-    var handoff: PendingTrack? = null
+    val handoffQueue = java.util.concurrent.ConcurrentLinkedQueue<PendingTrack>()
 
     /** 插件注册的状态监听 */
     @Volatile

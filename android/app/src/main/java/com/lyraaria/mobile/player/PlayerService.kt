@@ -83,13 +83,12 @@ class PlayerService : MediaSessionService() {
                 when (playbackState) {
                     Player.STATE_READY -> PlayerHolder.notifyState("loaded")
                     Player.STATE_ENDED -> {
-                        // 原生交接：有预解析好的下一首则直接续播（后台/锁屏 WebView 冻结也能推进）
-                        val nxt = PlayerHolder.handoff
-                        PlayerHolder.handoff = null
+                        // 原生队列：逐个取出预解析好的歌曲续播（WebView 冻结也能连续推进）
+                        val nxt = PlayerHolder.handoffQueue.poll()
                         PlayerHolder.notifyState("ended")
                         nxt?.let {
-                            PlayerHolder.notifyMedia("native-advanced:" + it.songId)
-                            loadAndPlay(this@PlayerService, it.url, it.title, it.artist, it.duration)
+                            PlayerHolder.notifyMedia("auto-advanced:" + it.songId)
+                            loadAndPlay(this@PlayerService, it.url, it.title, it.artist, it.duration, it.songId)
                         }
                     }
                 }
