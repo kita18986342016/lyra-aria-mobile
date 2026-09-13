@@ -259,6 +259,7 @@ class PlayerService : MediaSessionService() {
             .setContentIntent(android.app.PendingIntent.getActivity(this, 0,
                 Intent(this, com.lyraaria.mobile.MainActivity::class.java),
                 android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE))
+            .setLargeIcon(PlayerHolder.coverBitmap)
             .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
             // 五按钮（用户批次16规范）：收藏 / 上一首 / 播放暂停 / 下一首 / 锁定
             .addAction(notifAction(ACTION_FAV, R.drawable.ic_notif_fav, "收藏"))
@@ -366,6 +367,26 @@ class PlayerService : MediaSessionService() {
                 p.setMediaItem(item)
                 p.prepare()
                 p.playWhenReady = true
+                // 封面异步加载 → 通知 setLargeIcon
+                if (coverUrl.isNotEmpty()) {
+                    Thread {
+                        try {
+                            val conn = (java.net.URL(coverUrl).openConnection() as java.net.HttpURLConnection).apply { connectTimeout = 8000; readTimeout = 8000 }
+                            val bmp = android.graphics.BitmapFactory.decodeStream(conn.inputStream)
+                            conn.disconnect()
+                            if (bmp != null) {
+                                PlayerHolder.coverBitmap = bmp
+                                main.post {
+                                    try {
+                                        val svc = PlayerHolder.service ?: return@post
+                                        val nm2 = svc.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                                        nm2.notify(1, svc.buildNotification())
+                                    } catch (_: Exception) {}
+                                }
+                            }
+                        } catch (_: Exception) {}
+                    }.start()
+                }
                 onReady?.invoke()
                 // 播放即刷新通知（标题/歌手/歌词行）：Media3 manager 激活时走 onUpdateNotification
                 // （provider 通知含五按钮）；未激活退回手动 notify

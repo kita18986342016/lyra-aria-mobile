@@ -15,6 +15,8 @@ object PlayerHolder {
     var lyricLine: String? = null
     @Volatile
     var coverUrl: String = ""
+    @Volatile
+    var coverBitmap: android.graphics.Bitmap? = null
 
     /** 服务启动窗口内积压的播放请求（并发安全队列，防单槽覆盖竞态） */
     val pendingQueue = ConcurrentLinkedQueue<() -> Unit>()
