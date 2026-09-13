@@ -71,7 +71,9 @@ class NativePlayerPlugin : Plugin() {
         val title = call.getString("title") ?: ""
         val artist = call.getString("artist") ?: ""
         val duration = call.getFloat("duration", 0f) ?: 0f
-        PlayerService.loadAndPlay(context, url, title, artist, duration) {
+        val coverUrl = call.getString("coverUrl") ?: ""
+        PlayerHolder.coverUrl = coverUrl
+        PlayerService.loadAndPlay(context, url, title, artist, duration, coverUrl) {
             call.resolve(JSObject().apply { put("ok", true) })
         }
     }
@@ -84,7 +86,8 @@ class NativePlayerPlugin : Plugin() {
             ensureService()
             val url = (call.getString("url") ?: "").trim()
             if (url.isEmpty()) return call.reject("url 缺失")
-            PlayerService.loadAndPlay(context, url, call.getString("title") ?: "", call.getString("artist") ?: "", call.getFloat("duration", 0f) ?: 0f) {
+            PlayerHolder.coverUrl = call.getString("coverUrl") ?: ""
+            PlayerService.loadAndPlay(context, url, call.getString("title") ?: "", call.getString("artist") ?: "", call.getFloat("duration", 0f) ?: 0f, call.getString("coverUrl") ?: "") {
                 call.resolve(JSObject().apply { put("ok", true) })
             }
         }

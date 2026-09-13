@@ -256,6 +256,9 @@ class PlayerService : MediaSessionService() {
             .setContentTitle(title)
             .setContentText(text)
             .setOngoing(true)
+            .setContentIntent(android.app.PendingIntent.getActivity(this, 0,
+                Intent(this, com.lyraaria.mobile.MainActivity::class.java),
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE))
             .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
             // 五按钮（用户批次16规范）：收藏 / 上一首 / 播放暂停 / 下一首 / 锁定
             .addAction(notifAction(ACTION_FAV, R.drawable.ic_notif_fav, "收藏"))
@@ -325,7 +328,7 @@ class PlayerService : MediaSessionService() {
         private val main = Handler(Looper.getMainLooper())
 
         /** 播放指定 URL 并开始播放（任意线程可调，内部切主线程） */
-        fun loadAndPlay(context: Context, url: String, title: String, artist: String, duration: Float, onReady: (() -> Unit)? = null) {
+        fun loadAndPlay(context: Context, url: String, title: String, artist: String, duration: Float, coverUrl: String = "", onReady: (() -> Unit)? = null) {
             val p = PlayerHolder.player
             if (p == null) {
                 // 服务未就绪：入队等待（防连续调用覆盖）
@@ -356,6 +359,7 @@ class PlayerService : MediaSessionService() {
                         MediaMetadata.Builder()
                             .setTitle(title)
                             .setArtist(artist)
+                    .setArtworkUri(if (coverUrl.isNotEmpty()) android.net.Uri.parse(coverUrl) else null)
                             .build()
                     )
                     .build()

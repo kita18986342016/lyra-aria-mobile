@@ -766,7 +766,7 @@ async function recoverFromError() {
 
 async function playerLoad(song, url) {
   if (NP) {
-    await NP.load({ url, title: song.title, artist: song.artist || '', duration: song.duration || 0 });
+    await NP.load({ url, title: song.title, artist: song.artist || '', duration: song.duration || 0, coverUrl: song.picUrl || '' });
   } else {
     html5.src = url;
   }
@@ -1002,6 +1002,19 @@ function bindGuessFmSettings() {
     v[k] = v[k] ? 0 : 1; PREF.homeSec = v; savePrefs(); applyHomeSections();
   }));
   bindSeg('setPlayMode', 'playMode');
+  // 歌单位置：tab=底栏标签（默认），me=嵌入我的页
+  bindSeg('setPlLoc', 'plLoc');
+  try {
+    const applyPlLoc = () => {
+      const inMe = (PREF.plLoc || 'tab') === 'me';
+      document.querySelectorAll('.nav-item[data-view="pls"]').forEach((x) => x.style.display = inMe ? 'none' : '');
+      const meSec = document.getElementById('mePlaylists'); if (meSec) meSec.style.display = inMe ? '' : 'none';
+    };
+    applyPlLoc();
+    document.querySelectorAll('#setPlLoc .seg-item').forEach((b) => b.addEventListener('click', () => {
+      PREF.plLoc = b.dataset.v; savePrefs(); applyPlLoc();
+    }));
+  } catch (e) {}
   bindSeg('setHomeRec', 'homeRec');
   // 首页推荐显隐：切换后立即生效。重新打开时强制回推荐视图并无条件补载数据
   // （此刻可能停在设置页或 homeTab 已被隐藏逻辑改写，不能沿用当前 homeTab）

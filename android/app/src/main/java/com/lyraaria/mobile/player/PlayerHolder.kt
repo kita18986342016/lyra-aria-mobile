@@ -13,6 +13,8 @@ object PlayerHolder {
     /** 通知栏歌词：当前播放行的文本（Web 层歌词行变化时推送；无歌词为 null） */
     @Volatile
     var lyricLine: String? = null
+    @Volatile
+    var coverUrl: String = ""
 
     /** 服务启动窗口内积压的播放请求（并发安全队列，防单槽覆盖竞态） */
     val pendingQueue = ConcurrentLinkedQueue<() -> Unit>()

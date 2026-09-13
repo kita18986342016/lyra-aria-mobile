@@ -168,6 +168,10 @@
 
     <!-- 我的页（顶栏：我的 + 搜索/设置；用户卡 + 下载管理；设置收进独立页） -->
     <section id="pageMe" class="page hidden">
+      <div id="mePlaylists" class="me-section" style="display:none;margin-top:12px">
+        <div class="me-section-header"><div class="me-title">我的歌单</div><button class="pl-more" data-plcat="myPl" style="border:none;background:none;color:var(--muted);font-size:12px;cursor:pointer">更多 ›</button></div>
+        <div id="mePlList" class="opl-list"></div>
+      </div>
       <div class="me-top-nav">
         <div class="me-page-title">我的</div>
         <div class="me-top-icons">
@@ -236,6 +240,7 @@
         <div class="set-row"><span>睡眠定时</span><div class="seg" id="setSleepTimer"><button class="seg-item" data-v="0">关</button><button class="seg-item" data-v="15">15分</button><button class="seg-item" data-v="30">30分</button><button class="seg-item" data-v="60">60分</button><button class="seg-item" data-v="custom">自定义</button></div></div>
         <div class="set-row"><span>断点续播</span><div class="seg" id="setResume"><button class="seg-item active" data-v="1">开</button><button class="seg-item" data-v="0">关</button></div></div>
         <div class="set-row"><span>进度条样式</span><div class="seg" id="setPStyle"><button class="seg-item" data-v="A">滑杆式</button><button class="seg-item" data-v="B">细线式</button></div></div>
+        <div class="set-row"><span>歌单位置</span><div class="seg" id="setPlLoc"><button class="seg-item active" data-v="tab">底部标签</button><button class="seg-item" data-v="me">我的页内</button></div></div>
         <div class="set-row"><span>猜你喜欢续播</span><div class="seg" id="setFmAuto"><button class="seg-item active" data-v="1">开</button><button class="seg-item" data-v="0">关</button></div></div>
         <div class="set-row"><span>猜你喜欢尝新</span><div class="seg" id="setFmFresh"><button class="seg-item" data-v="0">关</button><button class="seg-item" data-v="0.1">10%</button><button class="seg-item active" data-v="0.3">30%</button><button class="seg-item" data-v="0.5">50%</button></div></div>
         <div class="set-row"><span>自动换源</span><div class="seg" id="setAutoSrc"><button class="seg-item active" data-v="1">开</button><button class="seg-item" data-v="0">关</button></div></div>
