@@ -2901,7 +2901,7 @@ async function resolvePlayable(song) {
     if (r.ok && r.data && r.data.url) return { song, url: r.data.url };
     return { song: null, url: null };
   }
-  const r = await leizResolve(song.source, song.ref, song.level || lv());
+  const r = await leizResolve(song.source, song.ref, qualityToLevel(song.source, PREF.onlineQ));
   if (r.ok && r.data && (r.data.url || r.data.src)) {
     // 徽章如实反映 leiz 实际返回的音质（leiz 服务端有会员权限，酷狗返回什么就标什么，不看本地账号）
     const got = r.data.level || r.data.quality || r.data.bitrate;
