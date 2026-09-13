@@ -1831,8 +1831,7 @@ async function doSearch() {
     }
   });
   // 搜索净化：过滤非原版；全滤空则回退保留原结果
-  const cleaned = items.filter((s) => !isNonOrig(s));
-  state.searchResults = cleaned.length ? cleaned : items;
+  state.searchResults = items; // 非原版搜索过滤已解除
   if (!state.searchResults.length) { $('searchHint').classList.add('hidden'); emptyState(listEl, 'search', '没有找到相关歌曲，换个关键词试试'); return; }
   $('searchHint').classList.add('hidden');
   // 来源过滤胶囊复位为「全部」并显示
@@ -2242,8 +2241,7 @@ function backFromDetail() {
 function autoSrcOn() { return PREF.autoSrc === undefined ? true : !!PREF.autoSrc; }
 function cleanImportedSongs(songs) {
   const arr = (songs || []).filter(Boolean);
-  const cleaned = arr.filter((s) => !isNonOrig(s));
-  return cleaned.length ? cleaned : arr;
+  return arr; // 非原版导入过滤已解除
 }
 
 // B站预热：导入后后台合成前几首（照 PC：节流 1.5s，失败即停不轰炸上游）
